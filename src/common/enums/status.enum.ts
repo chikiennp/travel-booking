@@ -1,6 +1,11 @@
 export enum Status {
-  Rejected = 'rejected',
-  Accepted = 'accepted',
-  Pending = 'pending',
-  Reviewed = 'reviewed',
+  REJECTED = 'rejected',
+  ACCEPTED = 'accepted',
+  PENDING = 'pending',
+  REVIEWED = 'reviewed',
+}
+
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
 }

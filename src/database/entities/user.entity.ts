@@ -1,9 +1,19 @@
-import { Role } from 'src/common/enums/role.enum';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { RoleEntity } from './user-role.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { AbstractEntity } from './base.entity';
+import { UserStatus } from '../../common/enums/status.enum';
+import { UserInfo } from './user-info.entity';
 
 @Entity('users')
-export class User extends AbstractEntity {
+export class UserEntity extends AbstractEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -16,12 +26,25 @@ export class User extends AbstractEntity {
   @Column()
   password: string;
 
-  @Column('simple-array')
-  roles: Role[];
-
-  @Column()
-  isActive: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 
   @Column({ type: 'timestamp', nullable: true })
   lastLogin?: Date;
+
+  @ManyToMany(() => RoleEntity)
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: { name: 'userId' },
+    inverseJoinColumn: { name: 'roleId' },
+  })
+  roles: RoleEntity[];
+
+  @OneToOne(() => UserInfo, (info) => info.user, { cascade: true })
+  @JoinColumn()
+  info: UserInfo;
 }
