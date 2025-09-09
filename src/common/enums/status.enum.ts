@@ -1,11 +1,17 @@
-export enum Status {
-  REJECTED = 'rejected',
-  ACCEPTED = 'accepted',
+export enum BookingStatus {
   PENDING = 'pending',
-  REVIEWED = 'reviewed',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
 }
 
-export enum UserStatus {
+export enum ActiveStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
+}
+
+export enum RoomStatus {
+  AVAILABLE = 'available',
+  BOOKED = 'booked',
+  MAINTENANCE = 'maintenance',
 }
