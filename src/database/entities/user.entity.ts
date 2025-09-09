@@ -5,12 +5,17 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { AbstractEntity } from './base.entity';
-import { UserStatus } from '../../common/enums/status.enum';
+import { ActiveStatus } from '../../common/enums/status.enum';
 import { UserInfo } from './user-info.entity';
+import { PropertyEntity } from './property.entity';
+import { ReviewEntity } from './review.entity';
+import { BookingEntity } from './booking.entity';
+import { BookingDraftEntity } from './draft.entity';
 
 @Entity('users')
 export class UserEntity extends AbstractEntity {
@@ -23,15 +28,15 @@ export class UserEntity extends AbstractEntity {
   @Column({ unique: true })
   username: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column({
     type: 'enum',
-    enum: UserStatus,
-    default: UserStatus.ACTIVE,
+    enum: ActiveStatus,
+    default: ActiveStatus.ACTIVE,
   })
-  status: UserStatus;
+  status: ActiveStatus;
 
   @Column({ type: 'timestamp', nullable: true })
   lastLogin?: Date;
@@ -47,4 +52,16 @@ export class UserEntity extends AbstractEntity {
   @OneToOne(() => UserInfo, (info) => info.user, { cascade: true })
   @JoinColumn()
   info: UserInfo;
+
+  @OneToMany(() => PropertyEntity, (property) => property.host)
+  properties: PropertyEntity[];
+
+  @OneToMany(() => ReviewEntity, (review) => review.user)
+  reviews: ReviewEntity[];
+
+  @OneToMany(() => BookingEntity, (booking) => booking.user)
+  bookings: BookingEntity[];
+
+  @OneToMany(() => BookingDraftEntity, (draft) => draft.user)
+  bookingDrafts: BookingDraftEntity[];
 }
