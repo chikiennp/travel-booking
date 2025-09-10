@@ -14,6 +14,7 @@ export class ValidationPipe implements PipeTransform {
       return value;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const object = plainToInstance(metatype, value) as object;
     const error = await validate(object);
     if (error.length > 0) {

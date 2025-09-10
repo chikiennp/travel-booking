@@ -1,26 +1,135 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity as User } from '../database/entities/user.entity';
+import { RoleEntity } from 'src/database/entities/user-role.entity';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
+import { Role } from 'src/common/enums/role.enum';
+import bcrypt from 'node_modules/bcryptjs';
+import { BCRYPT_SALT_ROUNDS } from 'src/common/constants/auth.constants';
+import { FilterUserDto } from './dto/filter-user.dto';
+import { UserMapper } from './mappers/user.mapper';
+import { AdminUserDto } from './dto/user-dto';
+import { ErrorMessage } from 'src/common/enums/message.enums';
+import { ActiveStatus } from 'src/common/enums/status.enum';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(RoleEntity)
+    private roleRepository: Repository<RoleEntity>,
+  ) {}
+
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { username } });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findById(id: number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findAll(filters: FilterUserDto): Promise<AdminUserDto[]> {
+    const query: FindOptionsWhere<User> = {};
+
+    if (filters.email) {
+      query.email = ILike(`%${filters.email}%`);
+    }
+    if (filters.username) {
+      query.username = ILike(`%${filters.username}%`);
+    }
+
+    const pageSize = 3;
+    const page = filters.page;
+
+    let users: User[];
+    if (page === undefined) {
+      users = await this.userRepository.find({ where: query });
+    } else {
+      users = await this.userRepository.find({
+        where: query,
+        skip: page * pageSize,
+        take: pageSize,
+      });
+    }
+    return users.map((user) => UserMapper.toAdminUserDto(user));
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async create(createUserDto: CreateUserDto, adminId?: number): Promise<User> {
+    const { info, ...userData } = createUserDto;
+
+    const customerRole = await this.roleRepository.findOne({
+      where: { role: Role.CUSTOMER },
+    });
+    if (!customerRole) {
+      throw new InternalServerErrorException(ErrorMessage.ROLE_NOT_FOUND);
+    }
+
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      BCRYPT_SALT_ROUNDS,
+    );
+
+    const newUser = {
+      ...userData,
+      roles: [customerRole],
+      password: hashedPassword,
+      status: ActiveStatus.ACTIVE,
+      createdBy: adminId,
+      info: info ? { ...info } : undefined,
+    };
+    return await this.userRepository.save(newUser);
+  }
+
+  async update(id: number, adminId: number, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+    }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(
+        updateUserDto.password,
+        BCRYPT_SALT_ROUNDS,
+      );
+    }
+
+    const updatedUser = { ...user, ...updateUserDto, updatedBy: adminId };
+    return await this.userRepository.save(updatedUser);
+  }
+
+  async remove(id: number) {
+    return this.userRepository.delete(id);
+  }
+
+  async softRemove(id: number, adminId: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+
+    user.isActive = false;
+    user.updatedBy = adminId;
+    return this.userRepository.save(user);
+  }
+
+  async restore(id: number, adminId: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+
+    user.isActive = true;
+    user.updatedBy = adminId;
+    return this.userRepository.save(user);
+  }
+
+  async updateLastLogin(userId: number) {
+    await this.userRepository.update(userId, { lastLogin: new Date() });
   }
 }
