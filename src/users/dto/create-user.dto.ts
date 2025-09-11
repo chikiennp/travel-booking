@@ -14,7 +14,6 @@ export class CreateUserDto {
   password: string;
 
   @IsOptional()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @Type(() => CreateUserInfoDto)
   info?: CreateUserInfoDto;
 }

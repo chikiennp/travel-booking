@@ -17,6 +17,8 @@ import { UserMapper } from './mappers/user.mapper';
 import { AdminUserDto } from './dto/user-dto';
 import { ErrorMessage } from 'src/common/enums/message.enums';
 import { ActiveStatus } from 'src/common/enums/status.enum';
+import { plainToInstance } from 'class-transformer';
+import { UserInfo } from 'src/database/entities/user-info.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,10 +26,16 @@ export class UsersService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(RoleEntity)
     private roleRepository: Repository<RoleEntity>,
+    @InjectRepository(UserInfo)
+    private infoRepository: Repository<UserInfo>,
   ) {}
 
   async findByUsername(username: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { username } });
+    return this.userRepository.findOne({
+      where: { username },
+      select: ['id', 'username', 'email', 'password', 'status'],
+      relations: ['roles'],
+    });
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -85,13 +93,16 @@ export class UsersService {
       password: hashedPassword,
       status: ActiveStatus.ACTIVE,
       createdBy: adminId,
-      info: info ? { ...info } : undefined,
+      info: info ? this.infoRepository.create(info) : undefined,
     };
     return await this.userRepository.save(newUser);
   }
 
   async update(id: number, adminId: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['info', 'roles'],
+    });
     if (!user) {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
@@ -103,8 +114,27 @@ export class UsersService {
       );
     }
 
-    const updatedUser = { ...user, ...updateUserDto, updatedBy: adminId };
-    return await this.userRepository.save(updatedUser);
+    const { roles: roleNames, info, ...otherFields } = updateUserDto;
+    Object.assign(user, otherFields);
+
+    if (info) {
+      user.info = plainToInstance(UserInfo, { ...user.info, ...info });
+    }
+
+    if (roleNames && roleNames.length) {
+      const roles: RoleEntity[] = [];
+      for (const roleName of roleNames) {
+        const role = await this.roleRepository.findOne({
+          where: { role: roleName },
+        });
+        if (!role) throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
+        roles.push(role);
+      }
+      user.roles = roles;
+    }
+
+    user.updatedBy = adminId;
+    return await this.userRepository.save(user);
   }
 
   async remove(id: number) {
@@ -115,7 +145,7 @@ export class UsersService {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
 
-    user.isActive = false;
+    user.status = ActiveStatus.INACTIVE;
     user.updatedBy = adminId;
     return this.userRepository.save(user);
   }
@@ -124,7 +154,7 @@ export class UsersService {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
 
-    user.isActive = true;
+    user.status = ActiveStatus.ACTIVE;
     user.updatedBy = adminId;
     return this.userRepository.save(user);
   }

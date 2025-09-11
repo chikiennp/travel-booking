@@ -13,6 +13,7 @@ import { IS_PUBLIC_KEY } from '../constants/auth.constants';
 import { REDIS_CLIENT } from '../constants/redis.constants';
 import * as redis from 'redis';
 import { ErrorMessage } from '../enums/message.enums';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -20,6 +21,7 @@ export class AuthGuard implements CanActivate {
     private jwtService: JwtService,
     private reflector: Reflector,
     @Inject(REDIS_CLIENT) private readonly redisClient: redis.RedisClientType,
+    private readonly configService: ConfigService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -37,11 +39,11 @@ export class AuthGuard implements CanActivate {
     let payload: JwtPayloadInterface;
     try {
       payload = await this.jwtService.verifyAsync<JwtPayloadInterface>(token, {
-        secret: process.env.JWT_SECRET,
+        secret: this.configService.get('JWT_SECRET'),
       });
       request['user'] = payload;
     } catch {
-      throw new UnauthorizedException('Failed to verify');
+      throw new UnauthorizedException(ErrorMessage.TOKEN_INVALID_OR_EXPIRED);
     }
     const redisToken = await this.redisClient.get(`auth:token:${payload.sub}`);
     if (!redisToken || redisToken !== token) {
