@@ -1,10 +1,8 @@
-import { Role } from 'src/common/enums/role.enum';
-
 export class UserDto {
   id: number;
   username: string;
   email: string;
-  roles: Role[];
+  roles: string[];
 }
 
 export class AdminUserDto extends UserDto {

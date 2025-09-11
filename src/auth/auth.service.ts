@@ -17,6 +17,7 @@ import { REDIS_CLIENT } from 'src/common/constants/redis.constants';
 import * as redis from 'redis';
 import { SignInDto } from './dto/sign-in.dto';
 import { ErrorMessage } from 'src/common/enums/message.enums';
+import { ActiveStatus } from 'src/common/enums/status.enum';
 
 @Injectable()
 export class AuthService {
@@ -40,12 +41,15 @@ export class AuthService {
       email: signUpDto.email,
       username: signUpDto.username,
       password: signUpDto.password,
+      info: signUpDto.info,
     };
-    const { id, email, username } = await this.userService.create(newUser);
+    const { id, email, username, info } =
+      await this.userService.create(newUser);
     return {
       id,
       email,
       username,
+      info,
     };
   }
 
@@ -55,7 +59,7 @@ export class AuthService {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
 
-    if (!user.isActive) {
+    if (user.status != ActiveStatus.ACTIVE) {
       throw new ForbiddenException(ErrorMessage.USER_INACTIVE);
     }
 
@@ -69,7 +73,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       username: user.username,
-      roles: user.roles,
+      roles: user.roles.map((r) => r.role),
     };
     //access token
     const token = await this.jwtService.signAsync(payload, {
