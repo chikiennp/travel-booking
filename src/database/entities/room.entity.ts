@@ -27,6 +27,9 @@ export class RoomEntity extends AbstractEntity {
   })
   status: string;
 
+  @Column('simple-array', { nullable: true })
+  images: string[];
+
   @ManyToOne(() => PropertyEntity, (property) => property.rooms, {
     onDelete: 'CASCADE',
   })
