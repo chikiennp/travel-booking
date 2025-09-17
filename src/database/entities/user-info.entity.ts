@@ -22,6 +22,9 @@ export class UserInfo extends AbstractEntity {
   @Column({ type: 'json', nullable: true })
   preferences: Record<string, any>;
 
+  @Column({ nullable: true })
+  avatar: string;
+
   @OneToOne(() => UserEntity, (user) => user.info)
   user: UserEntity;
 }

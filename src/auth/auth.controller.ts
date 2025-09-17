@@ -7,7 +7,9 @@ import {
   Post,
   Req,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -17,6 +19,9 @@ import { User } from 'src/common/decorators/user.decorator';
 import type { Request } from 'express';
 import { RefreshGuard } from 'src/common/guards/refresh.guard';
 import { SignUpDto } from './dto/sign-up.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfigFactory } from 'src/config/multer.config';
+import { UploadType } from 'src/common/enums/multer.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -25,8 +30,14 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Public()
   @Post('register')
-  async signUp(@Body() signUpDto: SignUpDto) {
-    return await this.authService.register(signUpDto);
+  @UseInterceptors(
+    FileInterceptor(UploadType.AVATAR, multerConfigFactory(UploadType.AVATAR)),
+  )
+  async signUp(
+    @Body() signUpDto: SignUpDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return await this.authService.register(signUpDto, file);
   }
 
   @HttpCode(HttpStatus.OK)

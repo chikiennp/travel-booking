@@ -1,7 +1,15 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { ActiveStatus } from 'src/common/enums/status.enum';
+import { Type } from 'class-transformer';
+import { UpdateUserInfoDto } from './update-user-info.dto';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
@@ -12,4 +20,9 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsArray()
   @IsString({ each: true })
   roles?: string[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UpdateUserInfoDto)
+  info?: UpdateUserInfoDto;
 }

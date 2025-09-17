@@ -32,6 +32,9 @@ export class PropertyEntity extends AbstractEntity {
   })
   status: ActiveStatus;
 
+  @Column('simple-array', { nullable: true })
+  images: string[];
+
   @ManyToOne(() => UserEntity, (user) => user.properties, {
     onDelete: 'CASCADE',
   })

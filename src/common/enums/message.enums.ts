@@ -17,6 +17,7 @@ export enum ErrorMessage {
   INVALID_INPUT = 'Invalid input provided',
   OPERATION_FAILED = 'Operation failed, please try again',
   ROLE_NOT_FOUND = 'Role not found in database',
+  IMG_FILES_ONLY = 'Only image files are allowed (jpg, jpeg, png)',
 }
 
 // Success / Info messages

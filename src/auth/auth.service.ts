@@ -27,7 +27,7 @@ export class AuthService {
     @Inject(REDIS_CLIENT) private redisClient: redis.RedisClientType,
   ) {}
 
-  async register(signUpDto: SignUpDto) {
+  async register(signUpDto: SignUpDto, file?: Express.Multer.File) {
     const user = await this.userService.findByUsername(signUpDto.username);
     if (user) {
       throw new ConflictException(ErrorMessage.USER_ALREADY_EXISTS);
@@ -41,7 +41,10 @@ export class AuthService {
       email: signUpDto.email,
       username: signUpDto.username,
       password: signUpDto.password,
-      info: signUpDto.info,
+      info: {
+        ...signUpDto.info,
+        avatar: file?.filename ?? null,
+      },
     };
     const { id, email, username, info } =
       await this.userService.create(newUser);

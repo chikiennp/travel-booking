@@ -43,7 +43,10 @@ export class UsersService {
   }
 
   async findById(id: number): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['roles', 'info'],
+    });
   }
 
   async findAll(filters: FilterUserDto): Promise<AdminUserDto[]> {
@@ -57,18 +60,14 @@ export class UsersService {
     }
 
     const pageSize = 3;
-    const page = filters.page;
+    const page = filters.page ?? 1;
 
-    let users: User[];
-    if (page === undefined) {
-      users = await this.userRepository.find({ where: query });
-    } else {
-      users = await this.userRepository.find({
-        where: query,
-        skip: page * pageSize,
-        take: pageSize,
-      });
-    }
+    const users = await this.userRepository.find({
+      where: query,
+      relations: ['roles', 'info'],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
     return users.map((user) => UserMapper.toAdminUserDto(user));
   }
 
