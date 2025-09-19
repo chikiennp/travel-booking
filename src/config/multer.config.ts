@@ -25,17 +25,17 @@ export const imageFileFilter = (
   callback(null, true);
 };
 
-export const multerConfigFactory = (type: UploadType, subFolder?: string) => {
+export const multerConfigFactory = (type: UploadType) => {
   const basePath = process.env.UPLOAD_LOCATION || './uploads';
-  const dest = subFolder
-    ? join(basePath, type, subFolder)
-    : join(basePath, type);
-
-  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
 
   return {
     storage: diskStorage({
-      destination: dest,
+      destination: (req, file, cb) => {
+        const dest = join(basePath, type);
+
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+        cb(null, dest);
+      },
       filename: (req, file, cb) => cb(null, fileNameGenerator(type, file)),
     }),
     limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE || '5242880', 10) },

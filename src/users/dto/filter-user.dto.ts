@@ -6,6 +6,7 @@ import {
   IsArray,
   IsInt,
   Min,
+  IsNumber,
 } from 'class-validator';
 
 export class FilterUserDto {
@@ -26,9 +27,14 @@ export class FilterUserDto {
   isActive?: boolean;
 
   @IsOptional()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   @Type(() => Number)
   @IsInt()
   @Min(0)
   page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  pageSize?: number;
 }

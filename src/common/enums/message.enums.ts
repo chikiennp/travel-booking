@@ -8,6 +8,10 @@ export enum ErrorMessage {
   FORBIDDEN_PROFILE = 'You can only view your own profile',
   USER_INACTIVE = 'User is inactive',
 
+  // Property errors
+  PROP_NOT_FOUND = 'Property not found',
+  PROP_ALREADY_EXISTS = 'Property already exists',
+
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',
   TOKEN_NOT_PROVIDED = 'No token provided',

@@ -59,7 +59,7 @@ export class UsersService {
       query.username = ILike(`%${filters.username}%`);
     }
 
-    const pageSize = 3;
+    const pageSize = filters.pageSize ?? 3;
     const page = filters.page ?? 1;
 
     const users = await this.userRepository.find({
@@ -136,6 +136,15 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
+  async updateStatus(id: number, status: ActiveStatus, adminId: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+
+    user.status = status;
+    user.updatedBy = adminId;
+    return this.userRepository.save(user);
+  }
+
   async remove(id: number) {
     return this.userRepository.delete(id);
   }
@@ -146,16 +155,8 @@ export class UsersService {
 
     user.status = ActiveStatus.INACTIVE;
     user.updatedBy = adminId;
-    return this.userRepository.save(user);
-  }
-
-  async restore(id: number, adminId: number) {
-    const user = await this.userRepository.findOneBy({ id });
-    if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
-
-    user.status = ActiveStatus.ACTIVE;
-    user.updatedBy = adminId;
-    return this.userRepository.save(user);
+    user.deletedAt = new Date();
+    await this.userRepository.save(user);
   }
 
   async updateLastLogin(userId: number) {

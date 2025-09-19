@@ -4,6 +4,7 @@ import {
   BeforeUpdate,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -33,4 +34,7 @@ export abstract class AbstractEntity extends BaseEntity {
   updateTimestamp() {
     this.updatedAt = new Date();
   }
+
+  @DeleteDateColumn({ nullable: true })
+  deletedAt?: Date | null;
 }
