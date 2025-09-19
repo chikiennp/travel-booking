@@ -26,6 +26,7 @@ import { UserMapper } from './mappers/user.mapper';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfigFactory } from 'src/config/multer.config';
 import { UploadType } from 'src/common/enums/multer.enum';
+import { ActiveStatus } from 'src/common/enums/status.enum';
 
 @Auth(Role.ADMIN)
 @Controller('users')
@@ -38,6 +39,7 @@ export class UsersController {
   }
 
   @Get()
+  @Auth(Role.ADMIN)
   async findAll(@Query() filters: FilterUserDto): Promise<AdminUserDto[]> {
     const users = this.usersService.findAll(filters);
     if (!(await users).length) {
@@ -123,9 +125,17 @@ export class UsersController {
     return UserMapper.toUserDto(user);
   }
 
-  @Delete(':id/restore')
-  restore(@User('sub') adminId: number, @Param('id', ParseIntPipe) id: number) {
-    return this.usersService.restore(id, adminId);
+  @Patch(':id/activate')
+  activateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @User('sub') adminId: number,
+  ) {
+    return this.usersService.updateStatus(id, ActiveStatus.ACTIVE, adminId);
+  }
+
+  @Patch(':id/ban')
+  banUser(@Param('id', ParseIntPipe) id: number, @User('sub') adminId: number) {
+    return this.usersService.updateStatus(id, ActiveStatus.INACTIVE, adminId);
   }
 
   @Delete(':id/softDelete')

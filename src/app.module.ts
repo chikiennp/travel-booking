@@ -6,6 +6,7 @@ import { typeOrmConfig } from './database/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { PropertyModule } from './property/property.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     TypeOrmModule.forRootAsync(typeOrmConfig),
     UsersModule,
     AuthModule,
+    PropertyModule,
   ],
 })
 export class AppModule {
