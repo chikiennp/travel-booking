@@ -49,14 +49,14 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  async signOut(@User('sub') userId: number) {
+  async signOut(@User('sub') userId: string) {
     return await this.authService.signOut(userId);
   }
 
   @Public()
   @UseGuards(RefreshGuard)
   @Post('refresh')
-  async refresh(@User('sub') userId: number, @Req() request: Request) {
+  async refresh(@User('sub') userId: string, @Req() request: Request) {
     const authHeader = request.headers['authorization'];
     if (!authHeader) throw new UnauthorizedException();
 

@@ -13,7 +13,6 @@ import {
 import { PropertyService } from './property.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
-import { ParseIntPipe } from 'src/common/pipes/parse-int.pipe';
 import { User } from 'src/common/decorators/user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { Role } from 'src/common/enums/role.enum';
@@ -35,7 +34,7 @@ export class PropertyController {
   )
   async create(
     @Body() createPropertyDto: CreatePropertyDto,
-    @User('sub') hostId: number,
+    @User('sub') hostId: string,
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
     return this.propertyService.create(hostId, createPropertyDto, files);
@@ -44,7 +43,7 @@ export class PropertyController {
   @Get()
   async findAllForHost(
     @Query() filters: FilterPropertyDto,
-    @User('sub') hostId: number,
+    @User('sub') hostId: string,
   ): Promise<PropertyDto[]> {
     return this.propertyService.findAll(filters, hostId);
   }
@@ -57,7 +56,7 @@ export class PropertyController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.propertyService.findOne(+id);
+    return this.propertyService.findOne(id);
   }
 
   @Patch(':id')
@@ -65,9 +64,9 @@ export class PropertyController {
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.PROPERTY)),
   )
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
-    @User('sub') hostId: number,
+    @User('sub') hostId: string,
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
     return this.propertyService.update(id, hostId, updatePropertyDto, files);
@@ -75,16 +74,13 @@ export class PropertyController {
 
   @Auth(Role.ADMIN)
   @Patch(':id/activate')
-  activate(
-    @Param('id', ParseIntPipe) id: number,
-    @User('sub') adminId: number,
-  ) {
+  activate(@Param('id') id: string, @User('sub') adminId: string) {
     return this.propertyService.updateStatus(id, ActiveStatus.ACTIVE, adminId);
   }
 
   @Auth(Role.ADMIN)
   @Patch(':id/disable')
-  disable(@Param('id', ParseIntPipe) id: number, @User('sub') adminId: number) {
+  disable(@Param('id') id: string, @User('sub') adminId: string) {
     return this.propertyService.updateStatus(
       id,
       ActiveStatus.INACTIVE,
@@ -94,16 +90,13 @@ export class PropertyController {
 
   @Auth(Role.ADMIN)
   @Delete(':id/softDelete')
-  softRemove(
-    @User('sub') adminId: number,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  softRemove(@User('sub') adminId: string, @Param('id') id: string) {
     return this.propertyService.softRemove(id, adminId);
   }
 
   @Auth(Role.ADMIN)
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.propertyService.remove(id);
   }
 }

@@ -19,7 +19,7 @@ export class PropertyService {
     private userRepository: Repository<UserEntity>,
   ) {}
   async create(
-    hostId: number,
+    hostId: string,
     createPropertyDto: CreatePropertyDto,
     files?: Express.Multer.File[],
   ) {
@@ -38,7 +38,7 @@ export class PropertyService {
     return this.propertyRepo.save(property);
   }
 
-  async findAll(filters: FilterPropertyDto, hostId?: number) {
+  async findAll(filters: FilterPropertyDto, hostId?: string) {
     const query: FindOptionsWhere<PropertyEntity> = {
       ...(filters.name && { name: ILike(`%${filters.name}%`) }),
       ...(filters.address && { address: ILike(`%${filters.address}%`) }),
@@ -58,13 +58,13 @@ export class PropertyService {
     return PropertyMapper.toDtos(properties);
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.propertyRepo.findOneBy({ id });
   }
 
   async update(
-    id: number,
-    hostId: number,
+    id: string,
+    hostId: string,
     updatePropertyDto: UpdatePropertyDto,
     files?: Express.Multer.File[],
   ) {
@@ -88,11 +88,11 @@ export class PropertyService {
     return this.propertyRepo.save(property);
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return this.propertyRepo.delete(id);
   }
 
-  async softRemove(id: number, adminId: number) {
+  async softRemove(id: string, adminId: string) {
     const property = await this.propertyRepo.findOneBy({ id });
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 
@@ -102,7 +102,7 @@ export class PropertyService {
     return this.propertyRepo.save(property);
   }
 
-  async updateStatus(id: number, status: ActiveStatus, adminId: number) {
+  async updateStatus(id: string, status: ActiveStatus, adminId: string) {
     const user = await this.propertyRepo.findOneBy({ id });
     if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
 

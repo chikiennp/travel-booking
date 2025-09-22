@@ -12,15 +12,15 @@ export class RoomService {
     return `This action returns all room`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} room`;
   }
 
-  update(id: number, updateRoomDto: UpdateRoomDto) {
+  update(id: string, updateRoomDto: UpdateRoomDto) {
     return `This action updates a #${id} room`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} room`;
   }
 }

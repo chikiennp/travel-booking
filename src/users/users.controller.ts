@@ -15,7 +15,6 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ParseIntPipe } from 'src/common/pipes/parse-int.pipe';
 import { User } from 'src/common/decorators/user.decorator';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { Role } from 'src/common/enums/role.enum';
@@ -35,7 +34,7 @@ export class UsersController {
 
   @Post()
   async createByAdmin(
-    @User('sub') adminId: number,
+    @User('sub') adminId: string,
     @Body() createUserDto: CreateUserDto & { roleNames?: Role[] },
   ) {
     const { roleNames, ...userDto } = createUserDto;
@@ -55,7 +54,7 @@ export class UsersController {
   @Get('me')
   @Auth()
   async getMe(
-    @User('sub') userId: number,
+    @User('sub') userId: string,
     @User('roles') roles: Role[],
   ): Promise<UserDto | AdminUserDto> {
     return this.findOne(userId, userId, roles);
@@ -64,8 +63,8 @@ export class UsersController {
   @Get(':id')
   @Auth()
   async findOne(
-    @Param('id', ParseIntPipe) id: number,
-    @User('sub') userId: number,
+    @Param('id') id: string,
+    @User('sub') userId: string,
     @User('roles') roles: Role[],
   ): Promise<UserDto | AdminUserDto> {
     if (!roles.includes(Role.ADMIN) && id !== userId) {
@@ -89,7 +88,7 @@ export class UsersController {
     FileInterceptor(UploadType.AVATAR, multerConfigFactory(UploadType.AVATAR)),
   )
   async updateMe(
-    @User('sub') userId: number,
+    @User('sub') userId: string,
     @User('roles') roles: Role[],
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file?: Express.Multer.File,
@@ -103,8 +102,8 @@ export class UsersController {
     FileInterceptor(UploadType.AVATAR, multerConfigFactory(UploadType.AVATAR)),
   )
   async update(
-    @Param('id', ParseIntPipe) id: number,
-    @User('sub') userId: number,
+    @Param('id') id: string,
+    @User('sub') userId: string,
     @User('roles') roles: Role[],
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file?: Express.Multer.File,
@@ -130,28 +129,22 @@ export class UsersController {
   }
 
   @Patch(':id/activate')
-  activateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @User('sub') adminId: number,
-  ) {
+  activateUser(@Param('id') id: string, @User('sub') adminId: string) {
     return this.usersService.updateStatus(id, ActiveStatus.ACTIVE, adminId);
   }
 
   @Patch(':id/ban')
-  banUser(@Param('id', ParseIntPipe) id: number, @User('sub') adminId: number) {
+  banUser(@Param('id') id: string, @User('sub') adminId: string) {
     return this.usersService.updateStatus(id, ActiveStatus.INACTIVE, adminId);
   }
 
   @Delete(':id/softDelete')
-  softRemove(
-    @User('sub') adminId: number,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  softRemove(@User('sub') adminId: string, @Param('id') id: string) {
     return this.usersService.softRemove(id, adminId);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
 }

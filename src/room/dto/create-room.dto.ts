@@ -23,5 +23,5 @@ export class CreateRoomDto {
   images?: string[];
 
   @IsNumber()
-  propertyId: number;
+  propertyId: string;
 }

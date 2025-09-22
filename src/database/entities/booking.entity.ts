@@ -12,8 +12,8 @@ import { BookingStatus } from './../../common/enums/status.enum';
 
 @Entity('bookings')
 export class BookingEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => UserEntity, (user) => user.bookings, { onDelete: 'CASCADE' })
   user: UserEntity;

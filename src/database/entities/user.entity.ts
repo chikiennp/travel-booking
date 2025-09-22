@@ -19,8 +19,8 @@ import { BookingDraftEntity } from './draft.entity';
 
 @Entity('users')
 export class UserEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   email: string;

@@ -5,8 +5,8 @@ import { PropertyEntity } from './property.entity';
 
 @Entity('reviews')
 export class ReviewEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ type: 'decimal', precision: 2, scale: 1 })
   rating: number;

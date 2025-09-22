@@ -28,59 +28,53 @@ export class RoomTypeController {
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM_TYPE)),
   )
-  @Post('property/:propertyId')
+  @Post('property/:index')
   async create(
-    @Param('propertyId', ParseIntPipe) propertyId: number,
-    @User('sub') hostId: number,
+    @Param('index', ParseIntPipe) index: number,
+    @User('sub') hostId: string,
     @Body() dto: CreateRoomTypeDto,
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
-    return await this.roomTypeService.create(hostId, propertyId, dto, files);
+    return await this.roomTypeService.create(hostId, index, dto, files);
   }
 
-  @Get('property/:propertyId')
+  @Get('property/:index')
   findAll(
-    @Param('propertyId', ParseIntPipe) propertyId: number,
-    @User('sub') hostId: number,
+    @Param('index', ParseIntPipe) index: number,
+    @User('sub') hostId: string,
   ) {
-    return this.roomTypeService.findAllByProperty(hostId, propertyId);
+    return this.roomTypeService.findAllByProperty(hostId, index);
   }
 
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM_TYPE)),
   )
-  @Patch('property/:propertyId/:roomTypeId')
+  @Patch('property/:index/:roomTypeId')
   update(
-    @Param('propertyId', ParseIntPipe) propertyId: number,
-    @Param('roomTypeId', ParseIntPipe) roomTypeId: number,
+    @Param('index', ParseIntPipe) index: number,
+    @Param('roomTypeId') roomTypeId: string,
     @Body() dto: UpdateRoomTypeDto,
-    @User('sub') hostId: number,
+    @User('sub') hostId: string,
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
-    return this.roomTypeService.update(
-      hostId,
-      propertyId,
-      roomTypeId,
-      dto,
-      files,
-    );
+    return this.roomTypeService.update(hostId, index, roomTypeId, dto, files);
   }
 
   @Delete('property/:propertyId/:roomTypeId/soft')
   softDelete(
-    @Param('propertyId', ParseIntPipe) propertyId: number,
-    @Param('roomTypeId', ParseIntPipe) roomTypeId: number,
-    @User('sub') hostId: number,
+    @Param('index', ParseIntPipe) index: number,
+    @Param('roomTypeId') roomTypeId: string,
+    @User('sub') hostId: string,
   ) {
-    return this.roomTypeService.softRemove(hostId, propertyId, roomTypeId);
+    return this.roomTypeService.softRemove(hostId, index, roomTypeId);
   }
 
   @Delete('property/:propertyId/:roomTypeId')
   delete(
-    @Param('propertyId', ParseIntPipe) propertyId: number,
-    @Param('roomTypeId', ParseIntPipe) roomTypeId: number,
-    @User('sub') hostId: number,
+    @Param('index', ParseIntPipe) index: number,
+    @Param('roomTypeId') roomTypeId: string,
+    @User('sub') hostId: string,
   ) {
-    return this.roomTypeService.remove(hostId, propertyId, roomTypeId);
+    return this.roomTypeService.remove(hostId, index, roomTypeId);
   }
 }

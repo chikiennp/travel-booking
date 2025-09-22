@@ -11,8 +11,8 @@ import { RoomType } from './room-type.entity';
 
 @Entity('rooms')
 export class RoomEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => RoomType, (roomType) => roomType.rooms, {
     onDelete: 'CASCADE',

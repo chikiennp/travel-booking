@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   BaseEntity,
   BeforeUpdate,
@@ -17,7 +16,7 @@ export abstract class AbstractEntity extends BaseEntity {
   createdAt: Date;
 
   @Column({ nullable: true })
-  createdBy: number;
+  createdBy: string;
 
   @UpdateDateColumn({
     type: 'timestamp',
@@ -28,7 +27,7 @@ export abstract class AbstractEntity extends BaseEntity {
   updatedAt: Date;
 
   @Column({ nullable: true })
-  updatedBy: number;
+  updatedBy: string;
 
   @BeforeUpdate()
   updateTimestamp() {

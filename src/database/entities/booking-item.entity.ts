@@ -5,8 +5,8 @@ import { RoomEntity } from './room.entity';
 
 @Entity('booking_items')
 export class BookingItemEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => BookingEntity, (booking) => booking.items, {
     onDelete: 'CASCADE',

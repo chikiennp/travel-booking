@@ -6,7 +6,7 @@ export class UserInfoDto {
 }
 
 export class UserDto {
-  id: number;
+  id: string;
   username: string;
   email: string;
   roles: string[];
@@ -15,8 +15,8 @@ export class UserDto {
 
 export class AdminUserDto extends UserDto {
   createdAt: Date;
-  createdBy: number;
+  createdBy: string;
   updatedAt: Date;
-  updatedBy: number;
+  updatedBy: string;
   lastLogin?: Date | null;
 }

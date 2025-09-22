@@ -112,13 +112,13 @@ export class AuthService {
   }
 
   @HttpCode(204)
-  async signOut(@User('sub') userId: number) {
+  async signOut(@User('sub') userId: string) {
     await this.redisClient.del(`auth:token:${userId}`);
     await this.redisClient.del(`auth:refresh:${userId}`);
     return { message: 'Successfully logged out' };
   }
 
-  async refreshToken(@User('sub') userId: number, refreshToken: string) {
+  async refreshToken(@User('sub') userId: string, refreshToken: string) {
     const redisToken = await this.redisClient.get(`auth:refresh:${userId}`);
     if (!redisToken || redisToken !== refreshToken) {
       throw new UnauthorizedException(ErrorMessage.TOKEN_INVALID_OR_EXPIRED);

@@ -4,8 +4,8 @@ import { AbstractEntity } from './base.entity';
 
 @Entity('user_info')
 export class UserInfo extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ nullable: true })
   firstName: string;
