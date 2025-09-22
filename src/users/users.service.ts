@@ -42,7 +42,7 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
-  async findById(id: number): Promise<User | null> {
+  async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
       relations: ['roles', 'info'],
@@ -71,7 +71,7 @@ export class UsersService {
     return users.map((user) => UserMapper.toAdminUserDto(user));
   }
 
-  async create(createUserDto: CreateUserDto, adminId?: number): Promise<User> {
+  async create(createUserDto: CreateUserDto, adminId?: string): Promise<User> {
     const { info, ...userData } = createUserDto;
 
     const customerRole = await this.roleRepository.findOne({
@@ -100,7 +100,7 @@ export class UsersService {
   async createByAdmin(
     createUserDto: CreateUserDto,
     roleNames?: Role[],
-    adminId?: number,
+    adminId?: string,
   ): Promise<User> {
     const { info, ...userData } = createUserDto;
 
@@ -140,7 +140,7 @@ export class UsersService {
     return await this.userRepository.save(newUser);
   }
 
-  async update(id: number, adminId: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, adminId: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['info', 'roles'],
@@ -179,7 +179,7 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
-  async updateStatus(id: number, status: ActiveStatus, adminId: number) {
+  async updateStatus(id: string, status: ActiveStatus, adminId: string) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
 
@@ -188,11 +188,11 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return this.userRepository.delete(id);
   }
 
-  async softRemove(id: number, adminId: number) {
+  async softRemove(id: string, adminId: string) {
     const user = await this.userRepository.findOneBy({ id });
     if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
 
@@ -202,7 +202,7 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async updateLastLogin(userId: number) {
+  async updateLastLogin(userId: string) {
     await this.userRepository.update(userId, { lastLogin: new Date() });
   }
 }

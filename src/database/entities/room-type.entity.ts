@@ -12,8 +12,8 @@ import { AbstractEntity } from './base.entity';
 
 @Entity('room_types')
 export class RoomType extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => PropertyEntity, (property) => property.roomTypes, {
     onDelete: 'CASCADE',

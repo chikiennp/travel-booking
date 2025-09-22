@@ -17,12 +17,12 @@ export class RoomTypeService {
   ) {}
 
   async create(
-    hostId: number,
-    propertyId: number,
+    hostId: string,
+    index: number,
     dto: CreateRoomTypeDto,
     files?: Express.Multer.File[],
   ) {
-    const property = await this.findProperty(hostId, propertyId);
+    const property = await this.findProperty(hostId, index);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 
     const images = files?.map((f) => f.filename) || [];
@@ -36,14 +36,14 @@ export class RoomTypeService {
     return this.roomTypeRepo.save(roomType);
   }
 
-  async findAllByProperty(hostId: number, propertyId: number) {
-    const property = await this.findProperty(hostId, propertyId);
+  async findAllByProperty(hostId: string, index: number) {
+    const property = await this.findProperty(hostId, index);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 
     return property.roomTypes;
   }
 
-  async findProperty(hostId: number, index: number) {
+  async findProperty(hostId: string, index: number) {
     const property = await this.propertyRepo.find({
       where: { host: { id: hostId } },
       order: { id: 'ASC' },
@@ -66,13 +66,13 @@ export class RoomTypeService {
   }
 
   async update(
-    hostId: number,
-    propertyId: number,
-    roomTypeId: number,
+    hostId: string,
+    index: number,
+    roomTypeId: string,
     dto: UpdateRoomTypeDto,
     files?: Express.Multer.File[],
   ) {
-    const property = await this.findProperty(hostId, propertyId);
+    const property = await this.findProperty(hostId, index);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 
     const images = files?.map((f) => f.filename) || [];
@@ -91,7 +91,7 @@ export class RoomTypeService {
     return this.roomTypeRepo.save(newType);
   }
 
-  async remove(hostId: number, propertyId: number, roomTypeId: number) {
+  async remove(hostId: string, propertyId: number, roomTypeId: string) {
     const property = await this.findProperty(hostId, propertyId);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 
@@ -102,7 +102,7 @@ export class RoomTypeService {
     return this.roomTypeRepo.remove(roomType);
   }
 
-  async softRemove(hostId: number, propertyId: number, roomTypeId: number) {
+  async softRemove(hostId: string, propertyId: number, roomTypeId: string) {
     const property = await this.findProperty(hostId, propertyId);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 

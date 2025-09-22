@@ -13,8 +13,8 @@ import { RoomType } from './room-type.entity';
 
 @Entity('properties')
 export class PropertyEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;

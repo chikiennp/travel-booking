@@ -1,3 +1,3 @@
 export interface JwtRefreshInterface {
-  sub: number;
+  sub: string;
 }

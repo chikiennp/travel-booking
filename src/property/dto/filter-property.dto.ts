@@ -16,9 +16,8 @@ export class FilterPropertyDto {
   status?: ActiveStatus;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  hostId?: number;
+  @IsString()
+  hostId?: string;
 
   // pagination
   @IsOptional()

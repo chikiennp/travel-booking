@@ -11,8 +11,8 @@ import { DraftItemEntity } from './draft-item.entity';
 
 @Entity('booking_drafts')
 export class BookingDraftEntity extends AbstractEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => UserEntity, (user) => user.bookingDrafts, {
     onDelete: 'CASCADE',
