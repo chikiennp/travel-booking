@@ -11,6 +11,11 @@ export enum ErrorMessage {
   // Property errors
   PROP_NOT_FOUND = 'Property not found',
   PROP_ALREADY_EXISTS = 'Property already exists',
+  PROP_NOT_OWNED = 'You do not own this property',
+
+  // Property errors
+  ROOM_NOT_FOUND = 'Room not found',
+  ROOM_TYPE_NOT_FOUND = 'Room type not found',
 
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',
