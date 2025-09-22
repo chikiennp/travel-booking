@@ -34,8 +34,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@User('sub') adminId: number, @Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto, adminId);
+  async createByAdmin(
+    @User('sub') adminId: number,
+    @Body() createUserDto: CreateUserDto & { roleNames?: Role[] },
+  ) {
+    const { roleNames, ...userDto } = createUserDto;
+    return this.usersService.createByAdmin(userDto, roleNames, adminId);
   }
 
   @Get()

@@ -97,6 +97,49 @@ export class UsersService {
     return await this.userRepository.save(newUser);
   }
 
+  async createByAdmin(
+    createUserDto: CreateUserDto,
+    roleNames?: Role[],
+    adminId?: number,
+  ): Promise<User> {
+    const { info, ...userData } = createUserDto;
+
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      BCRYPT_SALT_ROUNDS,
+    );
+
+    const newUser = this.userRepository.create({
+      ...userData,
+      password: hashedPassword,
+      status: ActiveStatus.ACTIVE,
+      createdBy: adminId,
+      info: info ? this.infoRepository.create(info) : undefined,
+    });
+
+    if (roleNames && roleNames.length) {
+      const roles: RoleEntity[] = [];
+      for (const roleName of roleNames) {
+        const role = await this.roleRepository.findOne({
+          where: { role: roleName },
+        });
+        if (!role) throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
+        roles.push(role);
+      }
+      newUser.roles = roles;
+    } else {
+      const customerRole = await this.roleRepository.findOne({
+        where: { role: Role.CUSTOMER },
+      });
+      if (!customerRole) {
+        throw new InternalServerErrorException(ErrorMessage.ROLE_NOT_FOUND);
+      }
+      newUser.roles = [customerRole];
+    }
+
+    return await this.userRepository.save(newUser);
+  }
+
   async update(id: number, adminId: number, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({
       where: { id },

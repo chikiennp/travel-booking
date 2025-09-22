@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { PropertyModule } from './property/property.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PropertyModule } from './property/property.module';
     UsersModule,
     AuthModule,
     PropertyModule,
+    RoomModule,
   ],
 })
 export class AppModule {

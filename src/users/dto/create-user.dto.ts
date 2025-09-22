@@ -1,6 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { CreateUserInfoDto } from './create-user-info.dto';
+import { Role } from 'src/common/enums/role.enum';
 
 export class CreateUserDto {
   @IsEmail()
@@ -16,4 +23,8 @@ export class CreateUserDto {
   @IsOptional()
   @Type(() => CreateUserInfoDto)
   info?: CreateUserInfoDto;
+
+  @IsOptional()
+  @IsArray()
+  roleNames?: Role[];
 }
