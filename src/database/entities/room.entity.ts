@@ -8,6 +8,7 @@ import {
 import { AbstractEntity } from './base.entity';
 import { RoomStatus } from '../../common/enums/status.enum';
 import { RoomType } from './room-type.entity';
+import { PropertyEntity } from './property.entity';
 
 @Entity('rooms')
 export class RoomEntity extends AbstractEntity {
@@ -19,6 +20,12 @@ export class RoomEntity extends AbstractEntity {
   })
   @JoinColumn({ name: 'roomTypeId' })
   roomType: RoomType;
+
+  @ManyToOne(() => PropertyEntity, (property) => property.rooms, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'propertyId' })
+  property: PropertyEntity;
 
   @Column()
   roomNumber: string;

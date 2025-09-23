@@ -1,27 +1,53 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { RoomStatus } from '../../common/enums/status.enum';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { plainToInstance, Transform, Type } from 'class-transformer';
 
-export class CreateRoomDto {
+class BedDto {
   @IsString()
   type: string;
 
   @IsNumber()
+  quantity: number;
+}
+
+export class CreateRoomDto {
+  @IsString()
+  roomTypeId: string;
+
+  @IsString()
+  roomNumber: string;
+
+  @Type(() => Number)
+  @IsNumber()
   price: number;
 
-  @IsNumber()
-  capacity: number;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BedDto)
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value) as BedDto;
+        return plainToInstance(BedDto, parsed);
+      } catch {
+        return {};
+      }
+    }
+    return value ? plainToInstance(BedDto, value) : {};
+  })
+  beds?: BedDto;
 
   @IsOptional()
   @IsString()
   features?: string;
 
   @IsOptional()
-  @IsEnum(RoomStatus)
-  status?: RoomStatus;
-
-  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   images?: string[];
-
-  @IsNumber()
-  propertyId: string;
 }

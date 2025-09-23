@@ -10,6 +10,7 @@ import { UserEntity } from './user.entity';
 import { ReviewEntity } from './review.entity';
 import { ActiveStatus } from '../../common/enums/status.enum';
 import { RoomType } from './room-type.entity';
+import { RoomEntity } from './room.entity';
 
 @Entity('properties')
 export class PropertyEntity extends AbstractEntity {
@@ -42,6 +43,9 @@ export class PropertyEntity extends AbstractEntity {
 
   @OneToMany(() => RoomType, (roomType) => roomType.property, { cascade: true })
   roomTypes: RoomType[];
+
+  @OneToMany(() => RoomEntity, (room) => room.property, { cascade: true })
+  rooms: RoomEntity[];
 
   @OneToMany(() => ReviewEntity, (review) => review.property)
   reviews: ReviewEntity[];
