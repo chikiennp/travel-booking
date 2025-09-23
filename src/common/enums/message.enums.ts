@@ -15,7 +15,9 @@ export enum ErrorMessage {
 
   // Property errors
   ROOM_NOT_FOUND = 'Room not found',
+  ROOM_NOT_OWNED = 'Room not owned',
   ROOM_TYPE_NOT_FOUND = 'Room type not found',
+  ROOM_TYPE_NOT_OWNED = 'Room type not owned',
 
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',

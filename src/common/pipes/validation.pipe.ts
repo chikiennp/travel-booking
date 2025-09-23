@@ -30,7 +30,7 @@ export class ValidationPipe implements PipeTransform {
         error: this.formatErrors(errors),
       });
     }
-    return value;
+    return object;
   }
 
   private toValidate(metatype: new (...args: any[]) => any): boolean {

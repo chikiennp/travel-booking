@@ -39,7 +39,6 @@ export class RoomTypeService {
   async findAllByProperty(hostId: string, index: number) {
     const property = await this.findProperty(hostId, index);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
-
     return property.roomTypes;
   }
 
@@ -75,17 +74,18 @@ export class RoomTypeService {
     const property = await this.findProperty(hostId, index);
     if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
 
-    const images = files?.map((f) => f.filename) || [];
+    const images = files?.map((f) => f.filename);
 
     const roomType = property.roomTypes.find((rt) => rt.id === roomTypeId);
     if (!roomType) {
       throw new NotFoundException(ErrorMessage.ROOM_TYPE_NOT_FOUND);
     }
+
     const newType = {
       ...roomType,
       ...dto,
       property,
-      images,
+      images: images ?? roomType.images,
       updatedBy: hostId,
     };
     return this.roomTypeRepo.save(newType);
