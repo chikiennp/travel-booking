@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { PropertyModule } from './property/property.module';
 import { RoomModule } from './room/room.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RoomModule } from './room/room.module';
     AuthModule,
     PropertyModule,
     RoomModule,
+    BookingModule,
   ],
 })
 export class AppModule {
