@@ -20,6 +20,7 @@ import { UploadType } from 'src/common/enums/multer.enum';
 import { User } from 'src/common/decorators/user.decorator';
 import { mapRoomToDto } from './mapper/room.mapper';
 import { RoomStatus } from 'src/common/enums/status.enum';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Auth(Role.HOST)
 @Controller('room')
@@ -37,6 +38,26 @@ export class RoomController {
   ) {
     const room = await this.roomService.create(dto, hostId, files);
     return mapRoomToDto(room);
+  }
+
+  @UseInterceptors(
+    FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM)),
+  )
+  @Post('/batch')
+  async createMany(
+    @Body() dtos: CreateRoomDto[],
+    @User('sub') hostId: string,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ) {
+    const createdRooms = await this.roomService.createMany(dtos, hostId, files);
+    return createdRooms.map((room) => mapRoomToDto(room));
+  }
+
+  @Public()
+  @Get('property/:propertyId/public')
+  async findAllRoomsByPropertyPublic(@Param('propertyId') propertyId: string) {
+    const rooms = await this.roomService.findAllByProperty(propertyId);
+    return rooms.map(mapRoomToDto);
   }
 
   @Get('property/:propertyId')

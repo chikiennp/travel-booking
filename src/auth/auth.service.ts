@@ -57,7 +57,9 @@ export class AuthService {
   }
 
   async signIn(signInDto: SignInDto) {
-    const user = await this.userService.findByUsername(signInDto.username);
+    const user = await this.userService.findByEmailOrUsername(
+      signInDto.identifier,
+    );
     if (!user || !user.password) {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
