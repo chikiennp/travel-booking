@@ -6,21 +6,14 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { SignInDto } from './sign-in.dto';
 import { Type } from 'class-transformer';
 import { CreateUserInfoDto } from 'src/users/dto/create-user-info.dto';
 
-export class SignUpDto {
-  @IsString()
-  @IsNotEmpty()
-  username: string;
-
+export class SignUpDto extends SignInDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @IsString()
-  @MinLength(6)
-  password: string;
 
   @IsString()
   @MinLength(6)

@@ -38,27 +38,6 @@ export class PropertyService {
     return this.propertyRepo.save(property);
   }
 
-  async createMany(
-    hostId: string,
-    dtos: CreatePropertyDto[],
-    files?: Express.Multer.File[],
-  ) {
-    const host = await this.userRepository.findOneBy({ id: hostId });
-    if (!host) throw new NotFoundException('Host not found');
-
-    const images = files?.map((f) => f.filename) || [];
-
-    const properties = dtos.map((dto) => ({
-      ...dto,
-      images,
-      status: ActiveStatus.ACTIVE,
-      createdBy: hostId,
-      host,
-    }));
-
-    return this.propertyRepo.save(properties); // save nhiều entity 1 lần
-  }
-
   async findAll(filters: FilterPropertyDto, hostId?: string) {
     const query: FindOptionsWhere<PropertyEntity> = {
       ...(filters.name && { name: ILike(`%${filters.name}%`) }),

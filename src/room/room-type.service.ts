@@ -6,15 +6,12 @@ import { CreateRoomTypeDto } from './dto/create-room-type.dto';
 import { PropertyEntity } from 'src/database/entities/property.entity';
 import { ErrorMessage } from 'src/common/enums/message.enums';
 import { UpdateRoomTypeDto } from './dto/update-room-type.dto';
-import { RoomEntity } from 'src/database/entities/room.entity';
 
 @Injectable()
 export class RoomTypeService {
   constructor(
     @InjectRepository(RoomType)
     private readonly roomTypeRepo: Repository<RoomType>,
-    @InjectRepository(RoomEntity)
-    private readonly roomRepo: Repository<RoomEntity>,
     @InjectRepository(PropertyEntity)
     private readonly propertyRepo: Repository<PropertyEntity>,
   ) {}
@@ -37,21 +34,6 @@ export class RoomTypeService {
     });
 
     return this.roomTypeRepo.save(roomType);
-  }
-
-  async createManyTypes(
-    hostId: string,
-    index: number,
-    dtos: CreateRoomTypeDto[],
-    files?: Express.Multer.File[],
-  ) {
-    const results: RoomType[] = [];
-
-    for (const dto of dtos) {
-      const roomType = await this.create(hostId, index, dto, files);
-      results.push(roomType);
-    }
-    return results;
   }
 
   async findAllByProperty(hostId: string, index: number) {
