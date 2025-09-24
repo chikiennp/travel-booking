@@ -12,13 +12,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalGuards(app.get(AuthGuard));
   app.useGlobalInterceptors(new LoggingInterceptor());
-  app.enableCors({
-    origin: 'http://localhost:4000',
-    credentials: true,
-  });
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('PORT') ?? 3000;
+  const port = configService.get<number>('PORT') ?? 4000;
   await app.listen(port);
 }
 void bootstrap();

@@ -40,18 +40,6 @@ export class PropertyController {
     return this.propertyService.create(hostId, createPropertyDto, files);
   }
 
-  @Post('bulk')
-  @UseInterceptors(
-    FilesInterceptor('images', 10, multerConfigFactory(UploadType.PROPERTY)),
-  )
-  async createMany(
-    @Body() createPropertyDtos: CreatePropertyDto[],
-    @User('sub') hostId: string,
-    @UploadedFiles() files?: Express.Multer.File[],
-  ) {
-    return this.propertyService.createMany(hostId, createPropertyDtos, files);
-  }
-
   @Get()
   async findAllForHost(
     @Query() filters: FilterPropertyDto,

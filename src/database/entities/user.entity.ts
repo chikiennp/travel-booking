@@ -15,6 +15,7 @@ import { UserInfo } from './user-info.entity';
 import { PropertyEntity } from './property.entity';
 import { ReviewEntity } from './review.entity';
 import { BookingEntity } from './booking.entity';
+import { BookingDraftEntity } from './draft.entity';
 
 @Entity('users')
 export class UserEntity extends AbstractEntity {
@@ -60,4 +61,7 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany(() => BookingEntity, (booking) => booking.user)
   bookings: BookingEntity[];
+
+  @OneToMany(() => BookingDraftEntity, (draft) => draft.user)
+  bookingDrafts: BookingDraftEntity[];
 }
