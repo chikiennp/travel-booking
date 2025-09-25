@@ -27,7 +27,6 @@ export class PropertyService {
     if (!host) throw new NotFoundException('Host not found');
 
     const images = files?.map((f) => f.filename) || [];
-
     const property = {
       ...createPropertyDto,
       images,
@@ -35,7 +34,28 @@ export class PropertyService {
       createdBy: hostId,
       host,
     };
+
     return this.propertyRepo.save(property);
+  }
+
+  async createMany(
+    hostId: string,
+    dtos: CreatePropertyDto[],
+    files?: Express.Multer.File[],
+  ) {
+    const host = await this.userRepository.findOneBy({ id: hostId });
+    if (!host) throw new NotFoundException('Host not found');
+
+    const images = files?.map((f) => f.filename) || [];
+    const properties = dtos.map((dto) => ({
+      ...dto,
+      images,
+      status: ActiveStatus.ACTIVE,
+      createdBy: hostId,
+      host,
+    }));
+
+    return this.propertyRepo.save(properties);
   }
 
   async findAll(filters: FilterPropertyDto, hostId?: string) {
@@ -48,13 +68,13 @@ export class PropertyService {
 
     const pageSize = filters.pageSize ?? 3;
     const page = filters.page ?? 1;
-
     const properties = await this.propertyRepo.find({
       where: query,
       relations: ['host'],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
+
     return PropertyMapper.toDtos(properties);
   }
 
@@ -80,7 +100,6 @@ export class PropertyService {
       ...(property.images || []),
       ...(files?.map((f) => f.filename) || []),
     ];
-
     Object.assign(property, updatePropertyDto);
     property.images = images;
     property.updatedBy = hostId;

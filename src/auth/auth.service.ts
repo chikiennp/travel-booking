@@ -57,7 +57,9 @@ export class AuthService {
   }
 
   async signIn(signInDto: SignInDto) {
-    const user = await this.userService.findByUsername(signInDto.username);
+    const user = await this.userService.findByEmailOrUsername(
+      signInDto.identifier,
+    );
     if (!user || !user.password) {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
@@ -108,6 +110,7 @@ export class AuthService {
       accessTokenExpiresIn: Number(process.env.JWT_EXPIRES),
       refreshToken: refreshToken,
       refreshTokenExpiresIn: Number(process.env.JWT_REFRESH_EXPIRES),
+      user: user.info,
     };
   }
 

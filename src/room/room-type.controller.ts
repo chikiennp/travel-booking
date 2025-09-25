@@ -45,6 +45,20 @@ export class RoomTypeController {
     return mapRoomTypeToDto(roomType);
   }
 
+  // room-type.controller.ts
+  @Post('property/:index/bulk')
+  @UseInterceptors(
+    FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM_TYPE)),
+  )
+  async createBulkWithRooms(
+    @Body() dtos: CreateRoomTypeDto[],
+    @User('sub') hostId: string,
+    @Param('index', ParseIntPipe) index: number,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ) {
+    return this.roomTypeService.createManyTypes(hostId, index, dtos, files);
+  }
+
   @Get('property/:index')
   async findAll(
     @Param('index', ParseIntPipe) index: number,
