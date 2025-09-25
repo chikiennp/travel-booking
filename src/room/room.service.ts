@@ -43,7 +43,6 @@ export class RoomService {
     const beds = dto.beds
       ? { type: dto.beds.type, quantity: dto.beds.quantity }
       : {};
-
     const room = this.roomRepo.create({
       roomNumber: dto.roomNumber,
       price: dto.price,
@@ -58,6 +57,47 @@ export class RoomService {
     return this.roomRepo.save(room);
   }
 
+  async createMany(
+    dtos: CreateRoomDto[],
+    hostId: string,
+    files?: Express.Multer.File[],
+  ) {
+    const roomsToCreate: RoomEntity[] = [];
+
+    for (const dto of dtos) {
+      const roomType = await this.roomTypeRepo.findOne({
+        where: { id: dto.roomTypeId },
+        relations: ['property', 'property.host'],
+      });
+
+      if (!roomType) {
+        throw new NotFoundException(ErrorMessage.ROOM_NOT_FOUND);
+      }
+
+      if (roomType.property.host.id !== hostId) {
+        throw new ForbiddenException(ErrorMessage.ROOM_NOT_OWNED);
+      }
+
+      const beds = dto.beds
+        ? { type: dto.beds.type, quantity: dto.beds.quantity }
+        : {};
+      const room = this.roomRepo.create({
+        roomNumber: dto.roomNumber,
+        price: dto.price,
+        beds,
+        features: dto.features,
+        images: files?.map((f) => f.filename) || [],
+        roomType,
+        property: roomType.property,
+        status: RoomStatus.AVAILABLE,
+        createdBy: hostId,
+      });
+      roomsToCreate.push(room);
+    }
+
+    return this.roomRepo.save(roomsToCreate);
+  }
+
   async findAll(propertyId: string, hostId: string) {
     const rooms = await this.roomRepo.find({
       where: {
@@ -65,8 +105,8 @@ export class RoomService {
       },
       relations: ['roomType', 'property', 'property.host'],
     });
-
     if (!rooms.length) throw new NotFoundException(ErrorMessage.ROOM_NOT_FOUND);
+
     return rooms;
   }
 
@@ -78,8 +118,8 @@ export class RoomService {
       },
       relations: ['roomType', 'property', 'property.host'],
     });
-
     if (!room) throw new NotFoundException(ErrorMessage.ROOM_NOT_FOUND);
+
     return room;
   }
 
@@ -87,6 +127,18 @@ export class RoomService {
     const rooms = await this.roomRepo.find({
       where: {
         roomType: { id: roomTypeId, property: { host: { id: hostId } } },
+      },
+      relations: ['roomType', 'property', 'property.host'],
+      order: { roomNumber: 'ASC' },
+    });
+
+    return rooms;
+  }
+
+  async findAllByProperty(propertyId: string): Promise<RoomEntity[]> {
+    const rooms = await this.roomRepo.find({
+      where: {
+        roomType: { property: { id: propertyId } },
       },
       relations: ['roomType', 'property', 'property.host'],
       order: { roomNumber: 'ASC' },
@@ -111,7 +163,6 @@ export class RoomService {
     if (!room) throw new NotFoundException(ErrorMessage.ROOM_NOT_FOUND);
 
     const images = files?.map((f) => f.filename);
-
     const newRoom = {
       ...room,
       ...dto,

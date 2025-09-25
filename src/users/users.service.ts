@@ -42,6 +42,14 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  async findByEmailOrUsername(identifier: string) {
+    return this.userRepository.findOne({
+      where: [{ username: identifier }, { email: identifier }],
+      select: ['id', 'username', 'email', 'password', 'status'],
+      relations: ['roles', 'info'],
+    });
+  }
+
   async findById(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
@@ -61,13 +69,13 @@ export class UsersService {
 
     const pageSize = filters.pageSize ?? 3;
     const page = filters.page ?? 1;
-
     const users = await this.userRepository.find({
       where: query,
       relations: ['roles', 'info'],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
+
     return users.map((user) => UserMapper.toAdminUserDto(user));
   }
 
@@ -85,7 +93,6 @@ export class UsersService {
       createUserDto.password,
       BCRYPT_SALT_ROUNDS,
     );
-
     const newUser = {
       ...userData,
       roles: [customerRole],
@@ -94,6 +101,7 @@ export class UsersService {
       createdBy: adminId,
       info: info ? this.infoRepository.create(info) : undefined,
     };
+
     return await this.userRepository.save(newUser);
   }
 
