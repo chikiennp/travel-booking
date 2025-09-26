@@ -5,6 +5,8 @@ import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 import { AuthGuard } from './common/guards/auth.guard';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +18,7 @@ async function bootstrap() {
     origin: 'http://localhost:4000',
     credentials: true,
   });
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;

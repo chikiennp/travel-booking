@@ -11,9 +11,6 @@ import { Type } from 'class-transformer';
 export class BookingItemDto {
   @IsUUID()
   roomId: string;
-
-  @IsNumber()
-  quantity: number;
 }
 
 export class CreateBookingDto {

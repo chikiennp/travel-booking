@@ -16,8 +16,13 @@ export enum ErrorMessage {
   // Property errors
   ROOM_NOT_FOUND = 'Room not found',
   ROOM_NOT_OWNED = 'Room not owned',
+  ROOM_NOT_AVAILABLE = 'Room not available',
   ROOM_TYPE_NOT_FOUND = 'Room type not found',
   ROOM_TYPE_NOT_OWNED = 'Room type not owned',
+
+  // Booking
+  BOOKING_NOT_FOUND = 'Booking record not found',
+  BOOKING_CANT_BE_CANCELLED = 'Booking cannot be cancelled at this stage',
 
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',

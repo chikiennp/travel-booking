@@ -78,6 +78,46 @@ export class PropertyService {
     return PropertyMapper.toDtos(properties);
   }
 
+  async findAllPublic(filters: FilterPropertyDto) {
+    const { name, address, checkIn, checkOut, page, pageSize } = filters;
+
+    const qb = this.propertyRepo
+      .createQueryBuilder('property')
+      .leftJoinAndSelect('property.host', 'host')
+      .leftJoinAndSelect('property.roomTypes', 'roomType')
+      .leftJoinAndSelect('roomType.rooms', 'room')
+      .leftJoin('room.bookingItems', 'bookingItem')
+      .leftJoin('bookingItem.booking', 'booking');
+
+    if (name) {
+      qb.andWhere('property.name LIKE :name', { name: `%${name}%` });
+    }
+
+    if (address) {
+      qb.andWhere('property.address LIKE :address', {
+        address: `%${address}%`,
+      });
+    }
+
+    if (filters.guests) {
+      qb.andWhere(`roomType.capacity >= :guests`, { guests: filters.guests });
+    }
+
+    if (checkIn && checkOut) {
+      qb.andWhere(
+        `(booking.id IS NULL OR NOT (booking.checkIn < :checkOut AND booking.checkOut > :checkIn))`,
+        { checkIn, checkOut },
+      );
+    }
+
+    const limit = pageSize ?? 3;
+    const offset = ((page ?? 1) - 1) * limit;
+    qb.skip(offset).take(limit);
+    const properties = await qb.getMany();
+
+    return PropertyMapper.toDtos(properties);
+  }
+
   findOne(id: string) {
     return this.propertyRepo.findOneBy({ id });
   }

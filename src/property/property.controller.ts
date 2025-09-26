@@ -22,12 +22,13 @@ import { multerConfigFactory } from 'src/config/multer.config';
 import { FilterPropertyDto } from './dto/filter-property.dto';
 import { PropertyDto } from './dto/property.dto';
 import { ActiveStatus } from 'src/common/enums/status.enum';
+import { Public } from 'src/common/decorators/public.decorator';
 
-@Auth(Role.HOST)
 @Controller('property')
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
+  @Auth(Role.HOST)
   @Post()
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.PROPERTY)),
@@ -40,6 +41,7 @@ export class PropertyController {
     return this.propertyService.create(hostId, createPropertyDto, files);
   }
 
+  @Auth(Role.HOST)
   @Post('bulk')
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.PROPERTY)),
@@ -52,12 +54,20 @@ export class PropertyController {
     return this.propertyService.createMany(hostId, createPropertyDtos, files);
   }
 
+  @Public()
+  @Get('public')
+  async findAllPublic(
+    @Query() filters: FilterPropertyDto,
+  ): Promise<PropertyDto[]> {
+    return await this.propertyService.findAllPublic(filters);
+  }
+
+  @Auth(Role.HOST)
   @Get()
   async findAllForHost(
     @Query() filters: FilterPropertyDto,
-    @User('sub') hostId: string,
   ): Promise<PropertyDto[]> {
-    return this.propertyService.findAll(filters, hostId);
+    return this.propertyService.findAll(filters);
   }
 
   @Auth(Role.ADMIN)
@@ -71,6 +81,7 @@ export class PropertyController {
     return this.propertyService.findOne(id);
   }
 
+  @Auth(Role.HOST)
   @Patch(':id')
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.PROPERTY)),
