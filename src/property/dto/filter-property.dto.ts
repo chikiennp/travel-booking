@@ -1,4 +1,11 @@
-import { IsOptional, IsString, IsEnum, IsNumber, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ActiveStatus } from '../../common/enums/status.enum';
 
@@ -31,4 +38,18 @@ export class FilterPropertyDto {
   @Type(() => Number)
   @Min(1)
   pageSize?: number;
+
+  @IsOptional()
+  @IsDateString()
+  checkIn?: Date;
+
+  @IsOptional()
+  @IsDateString()
+  checkOut?: Date;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  guests?: number;
 }

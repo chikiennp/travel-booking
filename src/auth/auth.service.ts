@@ -48,11 +48,16 @@ export class AuthService {
     };
     const { id, email, username, info } =
       await this.userService.create(newUser);
+    const { phone, address, firstName, lastName } = info;
+
     return {
       id,
       email,
       username,
-      info,
+      phone,
+      address,
+      firstName,
+      lastName,
     };
   }
 
@@ -105,12 +110,23 @@ export class AuthService {
       refreshToken,
     );
 
+    const { email, info } = user;
+    const { phone, address, firstName, lastName } = info;
     return {
       accessToken: token,
       accessTokenExpiresIn: Number(process.env.JWT_EXPIRES),
       refreshToken: refreshToken,
       refreshTokenExpiresIn: Number(process.env.JWT_REFRESH_EXPIRES),
-      user: user.info,
+      userInfo: {
+        email,
+        phone,
+        address,
+        firstName,
+        lastName,
+        avatar: user.info.avatar
+          ? `${process.env.BASE_URL}/uploads/avatar/${user.info.avatar}`
+          : null,
+      },
     };
   }
 

@@ -82,6 +82,16 @@ export class UsersController {
     return UserMapper.toUserDto(user);
   }
 
+  @Patch('me/info')
+  @Auth()
+  async updateInfo(
+    @User('sub') userId: string,
+    @User('roles') roles: Role[],
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.update(userId, userId, roles, updateUserDto);
+  }
+
   @Patch('me')
   @Auth()
   @UseInterceptors(

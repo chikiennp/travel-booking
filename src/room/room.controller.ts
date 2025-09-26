@@ -22,11 +22,11 @@ import { mapRoomToDto } from './mapper/room.mapper';
 import { RoomStatus } from 'src/common/enums/status.enum';
 import { Public } from 'src/common/decorators/public.decorator';
 
-@Auth(Role.HOST)
 @Controller('room')
 export class RoomController {
   constructor(private readonly roomService: RoomService) {}
 
+  @Auth(Role.HOST)
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM)),
   )
@@ -40,6 +40,7 @@ export class RoomController {
     return mapRoomToDto(room);
   }
 
+  @Auth(Role.HOST)
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM)),
   )
@@ -60,6 +61,7 @@ export class RoomController {
     return rooms.map(mapRoomToDto);
   }
 
+  @Auth(Role.HOST)
   @Get('property/:propertyId')
   async findAll(
     @User('sub') hostId: string,
@@ -69,6 +71,7 @@ export class RoomController {
     return rooms.map(mapRoomToDto);
   }
 
+  @Auth(Role.HOST)
   @Get('type/:roomTypeId')
   async findAllByType(
     @User('sub') hostId: string,
@@ -78,12 +81,14 @@ export class RoomController {
     return rooms.map(mapRoomToDto);
   }
 
+  @Auth(Role.HOST)
   @Get(':id')
   async findOne(@User('sub') hostId: string, @Param('id') id: string) {
     const room = await this.roomService.findOne(id, hostId);
     return mapRoomToDto(room);
   }
 
+  @Auth(Role.HOST)
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM)),
   )
@@ -103,6 +108,7 @@ export class RoomController {
     return mapRoomToDto(room);
   }
 
+  @Auth(Role.HOST)
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -113,11 +119,13 @@ export class RoomController {
     return mapRoomToDto(room);
   }
 
+  @Auth(Role.HOST)
   @Delete(':id/soft')
   async softDelete(@Param('id') id: string, @User('sub') hostId: string) {
     return this.roomService.softRemove(id, hostId);
   }
 
+  @Auth(Role.HOST)
   @Delete(':id')
   async delete(@Param('id') id: string, @User('sub') hostId: string) {
     return this.roomService.remove(id, hostId);
