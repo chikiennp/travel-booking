@@ -1,4 +1,3 @@
-// booking.service.ts
 import {
   BadRequestException,
   Injectable,
@@ -14,25 +13,39 @@ import { ONE_DAY } from 'src/common/constants/daytime.constants';
 import { BookingItemEntity } from 'src/database/entities/booking-item.entity';
 import { ErrorMessage } from 'src/common/enums/message.enums';
 import { SeasonalPricingEntity } from 'src/database/entities/price.entity';
+import { UserEntity } from 'src/database/entities/user.entity';
+import { BookingInfo } from 'src/database/entities/booking-info.entity';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(BookingEntity)
     private readonly bookingRepository: Repository<BookingEntity>,
+    @InjectRepository(BookingInfo)
+    private readonly bookingInfoRepo: Repository<BookingInfo>,
     @InjectRepository(BookingItemEntity)
     private readonly bookingItemRepository: Repository<BookingItemEntity>,
     @InjectRepository(RoomEntity)
     private readonly roomRepository: Repository<RoomEntity>,
     @InjectRepository(SeasonalPricingEntity)
     private readonly seasonalPricingRepository: Repository<SeasonalPricingEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
   async createBooking(
     dto: CreateBookingDto,
     userId: string,
   ): Promise<BookingEntity> {
-    const { checkIn, checkOut, guestCount } = dto;
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['info'],
+    });
+    if (!user) {
+      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+    }
+
+    const { checkIn, checkOut, guestCount, info: bookingInfo } = dto;
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
     const totalMultiplier = await this.getSeasonalMultiplier(
@@ -79,7 +92,6 @@ export class BookingService {
 
       const basePrice = room.price * numberOfNights;
       const subTotal = basePrice * totalMultiplier * discount;
-
       totalPrice = totalPrice + subTotal;
       const newBookingItem = this.bookingItemRepository.create({
         room,
@@ -91,7 +103,7 @@ export class BookingService {
       bookingItems.push(newBookingItem);
     }
 
-    const newBooking = {
+    const newBooking = this.bookingRepository.create({
       user: { id: userId },
       checkIn,
       checkOut,
@@ -100,9 +112,29 @@ export class BookingService {
       totalPrice,
       status: BookingStatus.PENDING,
       createdBy: userId,
-    };
+    });
 
-    return this.bookingRepository.save(newBooking);
+    let infoEntity: BookingInfo;
+    if (bookingInfo) {
+      infoEntity = this.bookingInfoRepo.create({
+        booking: newBooking,
+        firstName: bookingInfo.firstName || user.info.firstName,
+        lastName: bookingInfo.lastName || user.info.lastName,
+        email: bookingInfo.email || user.email,
+        phone: bookingInfo.phone || user.info.phone,
+      });
+    } else {
+      infoEntity = this.bookingInfoRepo.create({
+        booking: newBooking,
+        firstName: user.info.firstName,
+        lastName: user.info.lastName,
+        email: user.email,
+        phone: user.info.phone,
+      });
+    }
+    newBooking.info = infoEntity;
+
+    return await this.bookingRepository.save(newBooking);
   }
 
   async isAvailable(
@@ -215,7 +247,6 @@ export class BookingService {
     if (!booking) {
       throw new NotFoundException(ErrorMessage.BOOKING_NOT_FOUND);
     }
-
     booking.status = BookingStatus.CANCELED;
     booking.updatedBy = userId;
     booking.updatedAt = new Date();

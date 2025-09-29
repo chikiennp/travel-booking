@@ -5,12 +5,33 @@ import {
   IsUUID,
   IsArray,
   ValidateNested,
+  IsOptional,
+  IsString,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class BookingItemDto {
   @IsUUID()
   roomId: string;
+}
+
+export class BookingInfoDto {
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }
 
 export class CreateBookingDto {
@@ -27,4 +48,9 @@ export class CreateBookingDto {
   @ValidateNested({ each: true })
   @Type(() => BookingItemDto)
   items: BookingItemDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BookingInfoDto)
+  info?: BookingInfoDto;
 }
