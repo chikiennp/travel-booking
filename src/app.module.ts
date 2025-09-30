@@ -9,6 +9,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { PropertyModule } from './property/property.module';
 import { RoomModule } from './room/room.module';
 import { BookingModule } from './booking/booking.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { BookingModule } from './booking/booking.module';
     PropertyModule,
     RoomModule,
     BookingModule,
+    PaymentModule,
   ],
 })
 export class AppModule {

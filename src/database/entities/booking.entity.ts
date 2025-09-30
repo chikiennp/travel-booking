@@ -1,14 +1,18 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { AbstractEntity } from './base.entity';
 import { UserEntity } from './user.entity';
 import { BookingItemEntity } from './booking-item.entity';
 import { BookingStatus } from './../../common/enums/status.enum';
+import { BookingInfo } from './booking-info.entity';
+import { PaymentEntity } from './payment.entity';
 
 @Entity('bookings')
 export class BookingEntity extends AbstractEntity {
@@ -39,4 +43,11 @@ export class BookingEntity extends AbstractEntity {
 
   @OneToMany(() => BookingItemEntity, (item) => item.booking, { cascade: true })
   items: BookingItemEntity[];
+
+  @OneToOne(() => BookingInfo, (info) => info.booking, { cascade: true })
+  @JoinColumn()
+  info: BookingInfo;
+
+  @OneToMany(() => PaymentEntity, (payment) => payment.booking)
+  payments: PaymentEntity[];
 }

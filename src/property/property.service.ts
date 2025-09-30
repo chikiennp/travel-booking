@@ -90,7 +90,9 @@ export class PropertyService {
       .leftJoin('bookingItem.booking', 'booking');
 
     if (name) {
-      qb.andWhere('property.name LIKE :name', { name: `%${name}%` });
+      qb.andWhere('LOWER(property.name) LIKE LOWER(:name)', {
+        name: `%${name}%`,
+      });
     }
 
     if (address) {

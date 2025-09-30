@@ -15,3 +15,11 @@ export enum RoomStatus {
   BOOKED = 'booked',
   MAINTENANCE = 'maintenance',
 }
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  CANCELED = 'canceled',
+  REFUNDED = 'refunded',
+}

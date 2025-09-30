@@ -22,6 +22,10 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
+  const timezone = configService.get<string>('TZ');
+  if (timezone) {
+    process.env.TZ = timezone;
+  }
   await app.listen(port);
 }
 void bootstrap();
