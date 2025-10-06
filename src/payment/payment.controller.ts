@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { PaymentService } from './payment.service';
