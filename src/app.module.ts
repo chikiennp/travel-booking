@@ -10,6 +10,8 @@ import { PropertyModule } from './property/property.module';
 import { RoomModule } from './room/room.module';
 import { BookingModule } from './booking/booking.module';
 import { PaymentModule } from './payment/payment.module';
+import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -24,7 +26,9 @@ import { PaymentModule } from './payment/payment.module';
     RoomModule,
     BookingModule,
     PaymentModule,
+    ChatModule,
   ],
+  providers: [ChatGateway],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
