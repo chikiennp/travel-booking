@@ -24,6 +24,9 @@ export enum ErrorMessage {
   BOOKING_NOT_FOUND = 'Booking record not found',
   BOOKING_CANT_BE_CANCELLED = 'Booking cannot be cancelled at this stage',
 
+  // Chat Module errors
+  CHAT_ROOM_NOT_FOUND = 'Chat Room not found',
+
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',
   TOKEN_NOT_PROVIDED = 'No token provided',

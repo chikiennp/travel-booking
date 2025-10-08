@@ -23,3 +23,8 @@ export enum PaymentStatus {
   CANCELED = 'canceled',
   REFUNDED = 'refunded',
 }
+
+export enum ChatStatus {
+  OPEN = 'open',
+  CLOSED = 'closed',
+}
