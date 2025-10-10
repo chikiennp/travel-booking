@@ -1,5 +1,12 @@
-// booking.controller.ts
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Auth } from 'src/common/decorators/auth.decorator';
@@ -18,6 +25,12 @@ export class BookingController {
     @User('sub') userId: string,
   ) {
     return this.bookingService.createBooking(createBookingDto, userId);
+  }
+
+  @Auth(Role.CUSTOMER)
+  @Get('me')
+  async getBookingList(@User('sub') userId: string) {
+    return this.bookingService.findAllBy(userId);
   }
 
   @Auth(Role.HOST)

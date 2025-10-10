@@ -4,10 +4,12 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { ChatEntity } from './chat.entity';
 import { ChatStatus } from './../../common/enums/status.enum';
 
+@Unique(['clientId', 'hostId', 'status'])
 @Entity('chat_rooms')
 export class ChatRoomEntity {
   @PrimaryGeneratedColumn('uuid')
