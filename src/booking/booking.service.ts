@@ -15,6 +15,7 @@ import { ErrorMessage } from 'src/common/enums/message.enums';
 import { SeasonalPricingEntity } from 'src/database/entities/price.entity';
 import { UserEntity } from 'src/database/entities/user.entity';
 import { BookingInfo } from 'src/database/entities/booking-info.entity';
+import { BookingMapper } from './mapper/booking-response.mapper';
 
 @Injectable()
 export class BookingService {
@@ -32,6 +33,16 @@ export class BookingService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
   ) {}
+
+  async findAllBy(userId: string) {
+    const bookings = await this.bookingRepository.find({
+      where: { user: { id: userId } },
+      relations: ['items', 'items.room', 'info'],
+      order: { createdAt: 'DESC' },
+    });
+
+    return bookings.map((booking) => BookingMapper.mapBookingToDto(booking));
+  }
 
   async createBooking(
     dto: CreateBookingDto,

@@ -12,6 +12,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SendChatDto } from './dto/send-chat.dto';
 import { ChatService } from './chat.service';
+import { BadGatewayException } from '@nestjs/common';
+import { ErrorMessage } from 'src/common/enums/message.enums';
 
 @WebSocketGateway({
   cors: {
@@ -21,25 +23,36 @@ import { ChatService } from './chat.service';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private users: number = 0;
-  private activeClients = new Map<string, string>();
+  private processedMessages = new Map<string, number>();
+  private readonly MESSAGE_COOLDOWN_MS = 500;
 
   constructor(private readonly chatService: ChatService) {}
 
   handleConnection(@ConnectedSocket() client: Socket) {
     this.users++;
     this.server.emit('users', this.users);
-    console.log(`Client connected: ${client.id}`);
   }
 
-  async handleDisconnect(@ConnectedSocket() client: Socket) {
+  handleDisconnect(@ConnectedSocket() client: Socket) {
     this.users--;
-    const roomId = this.activeClients.get(client.id);
-    if (roomId) {
-      await client.leave(roomId);
-      this.activeClients.delete(client.id);
-    }
     this.server.emit('users', this.users);
-    console.log(`Client disconnected: ${client.id}`);
+  }
+
+  disconnectAllClients() {
+    this.server.disconnectSockets(true);
+  }
+
+  @SubscribeMessage('admin_disconnect_all')
+  handleAdminDisconnectAll(@ConnectedSocket() client: Socket) {
+    this.disconnectAllClients();
+  }
+
+  @SubscribeMessage('join_room')
+  async handleJoinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() roomId: string,
+  ) {
+    await client.join(roomId);
   }
 
   @SubscribeMessage('send_message')
@@ -47,14 +60,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: SendChatDto,
   ): Promise<void> {
+    const fingerprint = `${payload.senderId}:${payload.content}`;
+    const now = Date.now();
+    const lastProcessedTime = this.processedMessages.get(fingerprint) || 0;
+
+    if (now - lastProcessedTime < this.MESSAGE_COOLDOWN_MS) {
+      throw new BadGatewayException(ErrorMessage.MESSAGE_SENT_TOO_FAST);
+      return;
+    }
     try {
+      this.processedMessages.set(fingerprint, now);
       const message = await this.chatService.sendMessage(payload);
       const roomId = message.chatRoom.id;
-      this.server.to(roomId).emit('receive_message', message);
 
       await client.join(roomId);
-      this.activeClients.set(client.id, roomId);
+      this.server.to(roomId).emit('receive_message', message);
     } catch (error) {
+      this.processedMessages.delete(fingerprint);
       client.emit('error', `Failed to send: ${error.message}`);
     }
   }

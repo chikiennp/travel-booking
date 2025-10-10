@@ -26,6 +26,7 @@ export enum ErrorMessage {
 
   // Chat Module errors
   CHAT_ROOM_NOT_FOUND = 'Chat Room not found',
+  MESSAGE_SENT_TOO_FAST = 'Message sent too fast',
 
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaymentEntity } from 'src/database/entities/payment.entity';
@@ -9,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import qs from 'qs';
 import moment from 'moment';
-import { PaymentStatus } from 'src/common/enums/status.enum';
+import { BookingStatus, PaymentStatus } from 'src/common/enums/status.enum';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { BookingEntity } from 'src/database/entities/booking.entity';
 import { ErrorMessage } from 'src/common/enums/message.enums';
@@ -109,6 +106,12 @@ export class PaymentService {
         payment.status =
           rspCode === '00' ? PaymentStatus.PAID : PaymentStatus.FAILED;
         await this.paymentRepo.save(payment);
+
+        if (payment.booking) {
+          payment.booking.status =
+            rspCode === '00' ? BookingStatus.COMPLETED : BookingStatus.CANCELED;
+          await this.bookingRepo.save(payment.booking);
+        }
       }
 
       if (isIpn) {
