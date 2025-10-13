@@ -40,6 +40,12 @@ export class UserEntity extends AbstractEntity {
   @Column({ type: 'timestamp', nullable: true })
   lastLogin?: Date;
 
+  @Column({ nullable: true })
+  resetToken?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetTokenExpiry?: Date;
+
   @ManyToMany(() => RoleEntity)
   @JoinTable({
     name: 'user_roles',

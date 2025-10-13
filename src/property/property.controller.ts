@@ -66,8 +66,9 @@ export class PropertyController {
   @Get()
   async findAllForHost(
     @Query() filters: FilterPropertyDto,
+    @User('sub') hostId: string,
   ): Promise<PropertyDto[]> {
-    return this.propertyService.findAll(filters);
+    return this.propertyService.findAll(filters, hostId);
   }
 
   @Auth(Role.ADMIN)

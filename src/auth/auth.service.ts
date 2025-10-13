@@ -130,6 +130,14 @@ export class AuthService {
     };
   }
 
+  async forgotPassword(email: string) {
+    return await this.userService.forgotPassword(email);
+  }
+
+  async resetPassword(token: string, password: string) {
+    return await this.userService.resetPassword(token, password);
+  }
+
   @HttpCode(204)
   async signOut(@User('sub') userId: string) {
     await this.redisClient.del(`auth:token:${userId}`);

@@ -7,6 +7,8 @@ export enum ErrorMessage {
   CONFIRM_PASSWORD_UNMATCHED = 'Confirm password does not match',
   FORBIDDEN_PROFILE = 'You can only view your own profile',
   USER_INACTIVE = 'User is inactive',
+  EMAIL_IS_REQUIRED = 'Email is required',
+  PASSWORD_IS_REQUIRED = 'Password is required',
 
   // Property errors
   PROP_NOT_FOUND = 'Property not found',
