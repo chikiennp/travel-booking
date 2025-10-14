@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Req,
+  Res,
   UnauthorizedException,
   UploadedFile,
   UseGuards,
@@ -18,7 +19,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { SignInDto } from './dto/sign-in.dto';
 import type { JwtPayloadInterface } from 'src/common/interfaces/jwt-payload.interface';
 import { User } from 'src/common/decorators/user.decorator';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { RefreshGuard } from 'src/common/guards/refresh.guard';
 import { SignUpDto } from './dto/sign-up.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -27,10 +28,14 @@ import { UploadType } from 'src/common/enums/multer.enum';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/change-password.dto';
 import { ErrorMessage } from 'src/common/enums/message.enums';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Public()
@@ -71,6 +76,22 @@ export class AuthController {
     if (!dto.newPassword)
       throw new BadRequestException(ErrorMessage.PASSWORD_IS_REQUIRED);
     return await this.authService.resetPassword(token, dto.newPassword);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('activate/:token')
+  @Public()
+  async activateAccount(@Param('token') token: string, @Res() res: Response) {
+    try {
+      await this.authService.activateAccount(token);
+      return res.redirect(
+        `${this.configService.get('CLIENT_URL')}/auth/login?activated=true`,
+      );
+    } catch {
+      return res.redirect(
+        `${this.configService.get('CLIENT_URL')}/auth/login?activated=false`,
+      );
+    }
   }
 
   @HttpCode(HttpStatus.OK)

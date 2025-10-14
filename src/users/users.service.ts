@@ -98,16 +98,46 @@ export class UsersService {
       createUserDto.password,
       BCRYPT_SALT_ROUNDS,
     );
+
+    const resetToken = uuidv4();
+    const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
     const newUser = {
       ...userData,
       roles: [customerRole],
       password: hashedPassword,
-      status: ActiveStatus.ACTIVE,
+      status: ActiveStatus.INACTIVE,
       createdBy: adminId,
       info: info ? this.infoRepository.create(info) : undefined,
+      resetToken,
+      resetTokenExpiry,
     };
 
+    const apiUrl = this.configService.get<string>('BASE_URL');
+    const activateLink = `${apiUrl}/auth/activate/${resetToken}`;
+    await this.mailerService.sendMail({
+      to: userData.email,
+      subject: 'Activate your account',
+      html: `
+        <h2>Activate Account Request</h2>
+        <p>Hello ${userData.email || ''},</p>
+        <p>Click the link below to activate your account (valid for 15 minutes):</p>
+        <a href="${activateLink}" target="_blank">${activateLink}</a>
+      `,
+    });
+
     return await this.userRepository.save(newUser);
+  }
+
+  async activateAccount(resetToken: string) {
+    const user = await this.userRepository.findOneBy({ resetToken });
+    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+      throw new NotFoundException(ErrorMessage.TOKEN_INVALID_OR_EXPIRED);
+    }
+
+    user.status = ActiveStatus.ACTIVE;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    return await this.userRepository.save(user);
   }
 
   async createByAdmin(

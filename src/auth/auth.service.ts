@@ -48,8 +48,8 @@ export class AuthService {
     };
     const { id, email, username, info } =
       await this.userService.create(newUser);
-    const { phone, address, firstName, lastName } = info;
 
+    const { phone, address, firstName, lastName } = info;
     return {
       id,
       email,
@@ -136,6 +136,10 @@ export class AuthService {
 
   async resetPassword(token: string, password: string) {
     return await this.userService.resetPassword(token, password);
+  }
+
+  async activateAccount(token: string) {
+    return await this.userService.activateAccount(token);
   }
 
   @HttpCode(204)
