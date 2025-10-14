@@ -12,7 +12,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SendChatDto } from './dto/send-chat.dto';
 import { ChatService } from './chat.service';
-import { BadGatewayException } from '@nestjs/common';
+import { BadGatewayException, Logger } from '@nestjs/common';
 import { ErrorMessage } from 'src/common/enums/message.enums';
 
 @WebSocketGateway({
@@ -21,8 +21,9 @@ import { ErrorMessage } from 'src/common/enums/message.enums';
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
+  private readonly logger = new Logger(ChatGateway.name);
   private users: number = 0;
+  @WebSocketServer() server: Server;
   private processedMessages = new Map<string, number>();
   private readonly MESSAGE_COOLDOWN_MS = 500;
 
@@ -31,11 +32,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(@ConnectedSocket() client: Socket) {
     this.users++;
     this.server.emit('users', this.users);
+    this.logger.log(
+      `Client connected: ${client.id}. Total users: ${this.users}`,
+    );
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
     this.users--;
     this.server.emit('users', this.users);
+    this.logger.log(
+      `Client disconnected: ${client.id}. Total users: ${this.users}`,
+    );
   }
 
   disconnectAllClients() {
@@ -45,6 +52,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('admin_disconnect_all')
   handleAdminDisconnectAll(@ConnectedSocket() client: Socket) {
     this.disconnectAllClients();
+    this.logger.log(`Admin triggered disconnect all: ${client.id}`);
   }
 
   @SubscribeMessage('join_room')
@@ -66,7 +74,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (now - lastProcessedTime < this.MESSAGE_COOLDOWN_MS) {
       throw new BadGatewayException(ErrorMessage.MESSAGE_SENT_TOO_FAST);
-      return;
     }
     try {
       this.processedMessages.set(fingerprint, now);

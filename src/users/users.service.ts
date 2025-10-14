@@ -19,6 +19,9 @@ import { ErrorMessage } from 'src/common/enums/message.enums';
 import { ActiveStatus } from 'src/common/enums/status.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserInfo } from 'src/database/entities/user-info.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +31,8 @@ export class UsersService {
     private roleRepository: Repository<RoleEntity>,
     @InjectRepository(UserInfo)
     private infoRepository: Repository<UserInfo>,
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
   ) {}
 
   async findByUsername(username: string): Promise<User | null> {
@@ -212,5 +217,47 @@ export class UsersService {
 
   async updateLastLogin(userId: string) {
     await this.userRepository.update(userId, { lastLogin: new Date() });
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      relations: ['info'],
+    });
+    if (!user) throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+
+    const resetToken = uuidv4();
+    const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await this.userRepository.save(user);
+
+    const clientUrl = this.configService.get<string>('CLIENT_URL');
+    const resetLink = `${clientUrl}/auth/forgot?token=${resetToken}`;
+
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Reset your password',
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>Hello ${user.info.firstName || ''},</p>
+        <p>Click the link below to reset your password (valid for 15 minutes):</p>
+        <a href="${resetLink}" target="_blank">${resetLink}</a>
+      `,
+    });
+
+    return { _id: user.id, email: user.email };
+  }
+
+  async resetPassword(resetToken: string, newPassword: string) {
+    const user = await this.userRepository.findOneBy({ resetToken });
+    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+      throw new NotFoundException(ErrorMessage.TOKEN_INVALID_OR_EXPIRED);
+    }
+
+    user.password = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    return await this.userRepository.save(user);
   }
 }

@@ -18,48 +18,40 @@ export class ChatService {
     private chatRepository: Repository<ChatEntity>,
   ) {}
 
-  async findOrCreateChatRoom(
-    clientId: string,
-    isGuest: boolean,
-    hostId?: string,
-  ) {
-    let room = await this.chatRoomRepository.findOne({
-      where: { clientId, hostId, status: ChatStatus.OPEN },
-    });
-
-    if (!room) {
-      try {
-        room = await this.chatRoomRepository.save({
-          clientId,
-          isGuest,
-          hostId,
-          status: ChatStatus.OPEN,
-        });
-      } catch {
-        room = await this.chatRoomRepository.findOne({
-          where: { clientId, hostId, status: ChatStatus.OPEN },
-        });
-      }
-    }
-    return room;
-  }
-
   async sendMessage(dto: SendChatDto): Promise<ChatEntity> {
-    const room = await this.findOrCreateChatRoom(
-      dto.senderId,
-      dto.isGuest,
-      dto.hostId,
-    );
-    if (!room) {
-      throw new NotFoundException(ErrorMessage.CHAT_ROOM_NOT_FOUND);
+    let room: ChatRoomEntity | null = null;
+
+    if (dto.chatRoomId) {
+      room = await this.chatRoomRepository.findOne({
+        where: { id: dto.chatRoomId, status: ChatStatus.OPEN },
+      });
+      if (!room) {
+        throw new NotFoundException(ErrorMessage.CHAT_ROOM_NOT_FOUND);
+      }
+    } else {
+      room = await this.chatRoomRepository.findOne({
+        where: [
+          { hostId: dto.senderId, clientId: dto.receiverId },
+          { hostId: dto.receiverId, clientId: dto.senderId },
+        ],
+      });
     }
-    const message = {
+
+    if (!room) {
+      room = this.chatRoomRepository.create({
+        hostId: dto.hostId,
+        clientId: dto.userId,
+        status: ChatStatus.OPEN,
+      });
+      await this.chatRoomRepository.save(room);
+    }
+
+    const message = this.chatRepository.create({
       content: dto.content,
       senderId: dto.senderId,
       senderName: dto.senderName,
-      isGuest: dto.isGuest,
       chatRoom: room,
-    };
+    });
 
     return this.chatRepository.save(message);
   }
@@ -70,6 +62,9 @@ export class ChatService {
       relations: ['chats'],
       order: { createdAt: 'DESC' },
     });
+    if (!rooms) {
+      throw new NotFoundException(ErrorMessage.CHAT_ROOM_NOT_FOUND);
+    }
 
     return await Promise.all(
       rooms.map(async (room) => {
@@ -95,5 +90,46 @@ export class ChatService {
         };
       }),
     );
+  }
+
+  async getMessagesByRoomId(roomId: string) {
+    const messages = await this.chatRepository.find({
+      where: { chatRoom: { id: roomId } },
+      order: { createdAt: 'ASC' },
+    });
+    if (!messages.length) {
+      throw new NotFoundException(ErrorMessage.CHAT_ROOM_NOT_FOUND);
+    }
+
+    return messages.map((chat) => ({
+      id: chat.id,
+      content: chat.content,
+      senderId: chat.senderId,
+      senderName: chat.senderName,
+      isGuest: chat.isGuest,
+      createdAt: chat.createdAt,
+    }));
+  }
+
+  async getMessagesByHostId(userId: string, hostId: string) {
+    const room = await this.chatRoomRepository.findOne({
+      where: { clientId: userId, hostId: hostId, status: ChatStatus.OPEN },
+    });
+    if (!room) {
+      throw new NotFoundException(ErrorMessage.CHAT_ROOM_NOT_FOUND);
+    }
+
+    const messages = await this.chatRepository.find({
+      where: { chatRoom: room },
+      order: { createdAt: 'ASC' },
+    });
+
+    return messages.map((chat) => ({
+      id: chat.id,
+      content: chat.content,
+      senderId: chat.senderId,
+      senderName: chat.senderName,
+      createdAt: chat.createdAt,
+    }));
   }
 }

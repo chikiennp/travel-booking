@@ -1,7 +1,6 @@
 import {
   IsString,
   IsNotEmpty,
-  IsBoolean,
   IsOptional,
   MaxLength,
   MinLength,
@@ -16,11 +15,13 @@ export class SendChatDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(8)
+  receiverId: string;
+
+  @IsString()
+  @IsNotEmpty()
   @MaxLength(2000)
   content: string;
-
-  @IsBoolean()
-  isGuest: boolean;
 
   @IsString()
   @IsOptional()
@@ -34,4 +35,8 @@ export class SendChatDto {
   @IsUUID('4')
   @IsOptional()
   hostId?: string;
+
+  @IsUUID('4')
+  @IsOptional()
+  userId?: string;
 }

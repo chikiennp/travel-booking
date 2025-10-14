@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   UnauthorizedException,
@@ -22,6 +24,9 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfigFactory } from 'src/config/multer.config';
 import { UploadType } from 'src/common/enums/multer.enum';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/change-password.dto';
+import { ErrorMessage } from 'src/common/enums/message.enums';
 
 @Controller('auth')
 export class AuthController {
@@ -45,6 +50,27 @@ export class AuthController {
   @Post('login')
   async signIn(@Body() signInDto: SignInDto) {
     return await this.authService.signIn(signInDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    if (!dto.email)
+      throw new BadRequestException(ErrorMessage.EMAIL_IS_REQUIRED);
+    return await this.authService.forgotPassword(dto.email);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @Post('reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body() dto: ResetPasswordDto,
+  ) {
+    if (!dto.newPassword)
+      throw new BadRequestException(ErrorMessage.PASSWORD_IS_REQUIRED);
+    return await this.authService.resetPassword(token, dto.newPassword);
   }
 
   @HttpCode(HttpStatus.OK)
