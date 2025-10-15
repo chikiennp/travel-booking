@@ -30,6 +30,10 @@ export enum ErrorMessage {
   CHAT_ROOM_NOT_FOUND = 'Chat Room not found',
   MESSAGE_SENT_TOO_FAST = 'Message sent too fast',
 
+  // Review errors
+  REVIEW_NOT_FOUND = 'Review not found',
+  REVIEW_NOT_OWNED = 'You do not own this review',
+
   // Auth / Token errors
   TOKEN_INVALID_OR_EXPIRED = 'Token invalid or expired',
   TOKEN_NOT_PROVIDED = 'No token provided',
