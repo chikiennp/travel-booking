@@ -12,6 +12,7 @@ import { BookingModule } from './booking/booking.module';
 import { PaymentModule } from './payment/payment.module';
 import { ChatModule } from './chat/chat.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     BookingModule,
     PaymentModule,
     ChatModule,
+    ReviewModule,
   ],
 })
 export class AppModule {

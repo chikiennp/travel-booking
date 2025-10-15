@@ -9,6 +9,10 @@ import { ActiveStatus } from 'src/common/enums/status.enum';
 import { FilterPropertyDto } from './dto/filter-property.dto';
 import { PropertyMapper } from './mappers/property.mapper';
 import { UserEntity } from 'src/database/entities/user.entity';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+} from 'src/common/constants/pagination.constants';
 
 @Injectable()
 export class PropertyService {
@@ -112,12 +116,19 @@ export class PropertyService {
       );
     }
 
-    const limit = pageSize ?? 3;
-    const offset = ((page ?? 1) - 1) * limit;
+    qb.distinct(true);
+    const total = await qb.getCount();
+    const limit = pageSize ?? DEFAULT_PAGE_SIZE;
+    const offset = ((page ?? DEFAULT_PAGE) - 1) * limit;
     qb.skip(offset).take(limit);
     const properties = await qb.getMany();
 
-    return PropertyMapper.toDtos(properties);
+    return {
+      total,
+      page: page ?? DEFAULT_PAGE,
+      pageSize: limit,
+      data: PropertyMapper.toDtos(properties),
+    };
   }
 
   findOne(id: string) {

@@ -10,6 +10,8 @@ export class PropertyMapper {
       description: property.description,
       images: property.images,
       status: property.status,
+      star: property.star,
+      rating: property.rating,
       hostId: property.host?.id,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,

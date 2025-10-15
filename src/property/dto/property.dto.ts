@@ -6,6 +6,8 @@ export class PropertyDto {
   address: string;
   description?: string;
   images?: string[];
+  star?: number;
+  rating?: number;
   status: ActiveStatus;
   hostId?: string;
   createdAt: Date;

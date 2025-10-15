@@ -8,13 +8,15 @@ export class ReviewEntity extends AbstractEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'decimal', precision: 2, scale: 1 })
+  @Column({ type: 'decimal', precision: 3, scale: 1 })
   rating: number;
 
   @Column({ type: 'text', nullable: true })
   comment: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.reviews, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (user) => user.reviews, {
+    onDelete: 'CASCADE',
+  })
   user: UserEntity;
 
   @ManyToOne(() => PropertyEntity, (property) => property.reviews, {

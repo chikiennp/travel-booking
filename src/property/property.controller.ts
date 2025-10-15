@@ -23,6 +23,7 @@ import { FilterPropertyDto } from './dto/filter-property.dto';
 import { PropertyDto } from './dto/property.dto';
 import { ActiveStatus } from 'src/common/enums/status.enum';
 import { Public } from 'src/common/decorators/public.decorator';
+import { PaginatedPropertyDto } from './dto/response-property.dto';
 
 @Controller('property')
 export class PropertyController {
@@ -58,7 +59,7 @@ export class PropertyController {
   @Get('public')
   async findAllPublic(
     @Query() filters: FilterPropertyDto,
-  ): Promise<PropertyDto[]> {
+  ): Promise<PaginatedPropertyDto> {
     return await this.propertyService.findAllPublic(filters);
   }
 
