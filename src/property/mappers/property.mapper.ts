@@ -13,6 +13,8 @@ export class PropertyMapper {
       star: property.star,
       rating: property.rating,
       hostId: property.host?.id,
+      phone: property.host?.info?.phone,
+      mail: property.host?.email,
       createdAt: property.createdAt,
       updatedAt: property.updatedAt,
     };

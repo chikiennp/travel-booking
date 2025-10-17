@@ -20,12 +20,13 @@ import { UpdateRoomTypeDto } from './dto/update-room-type.dto';
 import { User } from 'src/common/decorators/user.decorator';
 import { ParseIntPipe } from 'src/common/pipes/parse-int.pipe';
 import { mapRoomTypeToDto } from './mapper/room.mapper';
+import { Public } from 'src/common/decorators/public.decorator';
 
-@Auth(Role.HOST)
 @Controller('room-type')
 export class RoomTypeController {
   constructor(private readonly roomTypeService: RoomTypeService) {}
 
+  @Auth(Role.HOST)
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM_TYPE)),
   )
@@ -45,7 +46,7 @@ export class RoomTypeController {
     return mapRoomTypeToDto(roomType);
   }
 
-  // room-type.controller.ts
+  @Auth(Role.HOST)
   @Post('property/:index/bulk')
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM_TYPE)),
@@ -59,6 +60,7 @@ export class RoomTypeController {
     return this.roomTypeService.createManyTypes(hostId, index, dtos, files);
   }
 
+  @Auth(Role.HOST)
   @Get('property/:index')
   async findAll(
     @Param('index', ParseIntPipe) index: number,
@@ -71,6 +73,14 @@ export class RoomTypeController {
     return roomTypes.map(mapRoomTypeToDto);
   }
 
+  @Public()
+  @Get('property/:id/public')
+  async findAllPublic(@Param('id') id: string) {
+    const roomTypes = await this.roomTypeService.findAllPublic(id);
+    return roomTypes.map(mapRoomTypeToDto);
+  }
+
+  @Auth(Role.HOST)
   @UseInterceptors(
     FilesInterceptor('images', 10, multerConfigFactory(UploadType.ROOM_TYPE)),
   )
@@ -92,6 +102,7 @@ export class RoomTypeController {
     return mapRoomTypeToDto(updatedRoomType);
   }
 
+  @Auth(Role.HOST)
   @Delete('property/:index/:roomTypeId/soft')
   softDelete(
     @Param('index', ParseIntPipe) index: number,
@@ -101,6 +112,7 @@ export class RoomTypeController {
     return this.roomTypeService.softRemove(hostId, index, roomTypeId);
   }
 
+  @Auth(Role.HOST)
   @Delete('property/:index/:roomTypeId')
   delete(
     @Param('index', ParseIntPipe) index: number,

@@ -88,6 +88,7 @@ export class PropertyService {
     const qb = this.propertyRepo
       .createQueryBuilder('property')
       .leftJoinAndSelect('property.host', 'host')
+      .leftJoinAndSelect('host.info', 'hostInfo')
       .leftJoinAndSelect('property.roomTypes', 'roomType')
       .leftJoinAndSelect('roomType.rooms', 'room')
       .leftJoin('room.bookingItems', 'bookingItem')

@@ -10,6 +10,8 @@ export class PropertyDto {
   rating?: number;
   status: ActiveStatus;
   hostId?: string;
+  mail?: string;
+  phone?: string;
   createdAt: Date;
   updatedAt: Date;
 }

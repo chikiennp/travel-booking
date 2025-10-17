@@ -58,6 +58,15 @@ export class RoomTypeService {
     return property.roomTypes;
   }
 
+  async findAllPublic(propertyId: string) {
+    const property = await this.propertyRepo.findOne({
+      where: { id: propertyId },
+      relations: ['roomTypes', 'host'],
+    });
+    if (!property) throw new NotFoundException(ErrorMessage.PROP_NOT_FOUND);
+    return property.roomTypes;
+  }
+
   async findProperty(hostId: string, index: number) {
     const property = await this.propertyRepo.find({
       where: { host: { id: hostId } },
